@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:pagtambong_attendance_system/events.dart';
-import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
 import 'firebase_options.dart';
 import 'scanner.dart';
@@ -42,13 +41,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index){
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   List<Widget> destinations = [const ScannerPage(), const EventsPage(), const PersonelPage()];
 

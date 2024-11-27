@@ -39,6 +39,7 @@ dependencies:
   firebase: ^9.0.3
   cloud_firestore: ^5.5.0
   provider: ^6.1.2
+  date_picker_plus: ^3.0.2
 
 dev_dependencies:
   flutter_test:

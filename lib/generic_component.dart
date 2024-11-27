@@ -6,7 +6,7 @@ import 'package:pagtambong_attendance_system/scanner.dart';
 class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget{
   const DefaultAppBar({super.key});
   
-  final String title = "Pagtambong";
+  final String title = "PAGTAMBONG";
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -40,9 +40,13 @@ class DefaultBottomNavbar extends StatelessWidget{
 
   void _onItemTapped(BuildContext context, int index){
     if(index == this.index) return;
+
+    // Navigator.pop(context);
+
     switch (index) {
       case 0:
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ScannerPage()));
+        // Navigator.pop(context);
         break;
       case 1:
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const EventsPage()));
