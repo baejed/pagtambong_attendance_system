@@ -41,47 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCeJiHj8dOH5V1qfcAZyFoBIYeah-PGXtA',
-    appId: '1:276223549958:web:5d410c154a2fd148d11987',
-    messagingSenderId: '276223549958',
-    projectId: 'pagtambong-firebasee',
-    authDomain: 'pagtambong-firebasee.firebaseapp.com',
-    storageBucket: 'pagtambong-firebasee.firebasestorage.app',
+    apiKey: 'AIzaSyDsPVHJ17FAvEwiukY_fd8eGcefMPdyXc8',
+    appId: '1:214065685114:web:7de3838e8239a5ad5191c3',
+    messagingSenderId: '214065685114',
+    projectId: 'pagtambong',
+    authDomain: 'pagtambong.firebaseapp.com',
+    storageBucket: 'pagtambong.firebasestorage.app',
+    measurementId: 'G-JBNGS5D4Q5',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC4k6sTf8nYPnDWs7Z4eYbXESvys5ywnHo',
-    appId: '1:276223549958:android:75fef16699da1754d11987',
-    messagingSenderId: '276223549958',
-    projectId: 'pagtambong-firebasee',
-    storageBucket: 'pagtambong-firebasee.firebasestorage.app',
+    apiKey: 'AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w',
+    appId: '1:214065685114:android:2dbf75b1317e9c335191c3',
+    messagingSenderId: '214065685114',
+    projectId: 'pagtambong',
+    storageBucket: 'pagtambong.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDkiU7KR0-PzNVhDP0WQMrQSNf1eZl3uE0',
-    appId: '1:276223549958:ios:6c1f1c5fdbb00207d11987',
-    messagingSenderId: '276223549958',
-    projectId: 'pagtambong-firebasee',
-    storageBucket: 'pagtambong-firebasee.firebasestorage.app',
+    apiKey: 'AIzaSyBqL0SLrOpN_kKsaN-Gq35hRwdJvE3Vcqk',
+    appId: '1:214065685114:ios:5a77f2f2cb4406c35191c3',
+    messagingSenderId: '214065685114',
+    projectId: 'pagtambong',
+    storageBucket: 'pagtambong.firebasestorage.app',
     iosBundleId: 'com.example.pagtambongAttendanceSystem',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDkiU7KR0-PzNVhDP0WQMrQSNf1eZl3uE0',
-    appId: '1:276223549958:ios:6c1f1c5fdbb00207d11987',
-    messagingSenderId: '276223549958',
-    projectId: 'pagtambong-firebasee',
-    storageBucket: 'pagtambong-firebasee.firebasestorage.app',
+    apiKey: 'AIzaSyBqL0SLrOpN_kKsaN-Gq35hRwdJvE3Vcqk',
+    appId: '1:214065685114:ios:5a77f2f2cb4406c35191c3',
+    messagingSenderId: '214065685114',
+    projectId: 'pagtambong',
+    storageBucket: 'pagtambong.firebasestorage.app',
     iosBundleId: 'com.example.pagtambongAttendanceSystem',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCeJiHj8dOH5V1qfcAZyFoBIYeah-PGXtA',
-    appId: '1:276223549958:web:401f99fd56c0b3bdd11987',
-    messagingSenderId: '276223549958',
-    projectId: 'pagtambong-firebasee',
-    authDomain: 'pagtambong-firebasee.firebaseapp.com',
-    storageBucket: 'pagtambong-firebasee.firebasestorage.app',
+    apiKey: 'AIzaSyDsPVHJ17FAvEwiukY_fd8eGcefMPdyXc8',
+    appId: '1:214065685114:web:be4fe87d7002c94f5191c3',
+    messagingSenderId: '214065685114',
+    projectId: 'pagtambong',
+    authDomain: 'pagtambong.firebaseapp.com',
+    storageBucket: 'pagtambong.firebasestorage.app',
+    measurementId: 'G-D51DLEBH78',
   );
 
 }

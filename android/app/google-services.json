@@ -1,13 +1,70 @@
 {
   "project_info": {
-    "project_number": "276223549958",
-    "project_id": "pagtambong-firebasee",
-    "storage_bucket": "pagtambong-firebasee.firebasestorage.app"
+    "project_number": "214065685114",
+    "project_id": "pagtambong",
+    "storage_bucket": "pagtambong.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:276223549958:android:75fef16699da1754d11987",
+        "mobilesdk_app_id": "1:214065685114:android:18ca04c178ee011d5191c3",
+        "android_client_info": {
+          "package_name": "com.barcode.scanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214065685114:android:59c7560ce94304ef5191c3",
+        "android_client_info": {
+          "package_name": "com.barcode.scanner.barcode_scanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214065685114:android:57b0702aef38e5c55191c3",
+        "android_client_info": {
+          "package_name": "com.example.pagtambong_attendance_s"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214065685114:android:2dbf75b1317e9c335191c3",
         "android_client_info": {
           "package_name": "com.example.pagtambong_attendance_system"
         }
@@ -15,7 +72,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC4k6sTf8nYPnDWs7Z4eYbXESvys5ywnHo"
+          "current_key": "AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w"
         }
       ],
       "services": {
