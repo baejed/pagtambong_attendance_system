@@ -8,7 +8,7 @@ class Eventdatabase with ChangeNotifier {
   Stream<List<Event>> getEvents() {
     return _eventCollection.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
-        return Event.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+        return Event.fromMap(doc.data() as Map<String, dynamic>);
       }).toList();
     });
   }

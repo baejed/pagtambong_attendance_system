@@ -1,8 +1,7 @@
 class Event {
-  String docId;
   String eventName;
   DateTime date;
-  bool isOpen;
+  bool isOpen = false;
   String organizer;
   String venue;
 
@@ -12,7 +11,6 @@ class Event {
     required this.organizer,
     required this.venue,
     required this.isOpen,
-    required this.docId,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,18 +20,16 @@ class Event {
       'organizer': organizer,
       'venue': venue,
       'is_open': isOpen,
-      'doc_id': docId
     };
   }
 
-  factory Event.fromMap(Map<String, dynamic> data, String id) {
+  factory Event.fromMap(Map<String, dynamic> data) {
     return Event(
       eventName: data['event_name'] ?? '',
       date: data['date'] ?? '',
       organizer: data['organizer'] ?? '',
       venue: data['venue'] ?? '',
       isOpen: data['is_open'] ?? '',
-      docId: id
     );
   }
 

@@ -8,6 +8,8 @@ import 'package:pagtambong_attendance_system/service/EventDatabase.dart';
 import 'package:provider/provider.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
 
+// TODO: add feedback when adding an event, properly dispose the controllers
+
 class EventsPage extends StatefulWidget {
 
   const EventsPage({super.key});
@@ -78,15 +80,19 @@ class EventForm extends StatefulWidget {
 
 class _EventFormState extends State<EventForm> {
 
+  final CollectionReference _eventsDB = FirebaseFirestore.instance.collection('events');
   DateTime _date = DateTime.now();
+  final eventNameController = TextEditingController();
+  final venueController = TextEditingController();
+  final organizerController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     
     return Scaffold(
-      appBar: DefaultAppBar(),
+      appBar: const DefaultAppBar(),
       body: Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -102,7 +108,8 @@ class _EventFormState extends State<EventForm> {
               SizedBox(
                 width: 1000,
                 child: TextField(
-                  decoration: InputDecoration(
+                  controller: eventNameController,
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -122,7 +129,8 @@ class _EventFormState extends State<EventForm> {
               SizedBox(
                 width: 1000,
                 child: TextField(
-                  decoration: InputDecoration(
+                  controller: venueController,
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -142,7 +150,8 @@ class _EventFormState extends State<EventForm> {
               SizedBox(
                 width: 1000,
                 child: TextField(
-                  decoration: InputDecoration(
+                  controller: organizerController,
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -178,6 +187,29 @@ class _EventFormState extends State<EventForm> {
                     hintText: "${_date.year}-${_date.month}-${_date.day}"
                   ),
                 ),
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  setState(() {
+                    if(
+                      eventNameController.text.isEmpty || 
+                      venueController.text.isEmpty ||
+                      organizerController.text.isEmpty
+                    ) return;
+
+                    Event event = Event(
+                      eventName: eventNameController.text, 
+                      date: _date, 
+                      organizer: organizerController.text, 
+                      venue: venueController.text, 
+                      isOpen: false
+                    );
+
+                    _eventsDB.add(event.toMap());
+
+                  });
+                }, 
+                child: const Text("Submit")
               ),
             ],
           ),
