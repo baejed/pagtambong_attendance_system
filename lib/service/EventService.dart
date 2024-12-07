@@ -22,4 +22,10 @@ class EventService{
     });
   }
 
+  static Future<void> addEvent(Event event) async{
+    final map = event.toMap();
+    map.putIfAbsent('is_deleted', () => false);
+    await _eventDb.add(map);
+  }
+
 }

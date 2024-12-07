@@ -283,7 +283,7 @@ class _EventFormState extends State<EventForm> {
                       organizerController.text.isEmpty
                     ) return;
 
-                  Event event = Event(
+                  Event eventModel = Event(
                       eventName: eventNameController.text, 
                       date: setTime(_date, _time), 
                       organizer: organizerController.text, 
@@ -291,7 +291,7 @@ class _EventFormState extends State<EventForm> {
                       isOpen: false
                   );
           
-                  edit ? EventService.updateEvent(event, widget.docRef!) : _eventsDB.add(event.toMap());
+                  edit ? EventService.updateEvent(eventModel, widget.docRef!) : EventService.addEvent(eventModel);
                   
                 }, 
                 child: const Text("Submit")
