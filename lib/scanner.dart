@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/model/Student.dart';
 import 'package:pagtambong_attendance_system/service/AttendanceService.dart';
 
@@ -93,13 +94,13 @@ class _ScannerPageState extends State<ScannerPage>{
                                               padding: const EdgeInsets.all(10),
                                               itemCount: streamSnapshot.data!.docs.length,
                                               itemBuilder: (context, index) {
-                                                final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
+                                                Event eventModel = Event.fromMap(streamSnapshot.data!.docs.first as Map<String, dynamic>);
                                                 return Material(child: ListTile(
-                                                  title: Text(documentSnapshot['event_name']),
-                                                  subtitle: Text(documentSnapshot['venue']),  
+                                                  title: Text(eventModel.eventName),
+                                                  subtitle: Text(eventModel.venue),  
                                                   onTap: () {
                                                     setState(() {
-                                                      _selectedEvent = documentSnapshot['event_name'];
+                                                      _selectedEvent = eventModel.eventName;
                                                     });
                                                     Navigator.pop(context);
                                                   },
@@ -162,8 +163,6 @@ class _ScannerPageState extends State<ScannerPage>{
 
                 QuerySnapshot student = await _studentsDb.where('student_id', isEqualTo: output).get();
                 QuerySnapshot event = await _eventsDB.where('event_name', isEqualTo: _selectedEvent).get();
-
-                
 
                 if(student.docs.isNotEmpty && event.docs.isNotEmpty){
 
