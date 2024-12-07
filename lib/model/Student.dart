@@ -1,12 +1,10 @@
 class Student {
   String firstName;
-  bool isPresent;
   String lastName;
   String studentId;
 
   Student({
     required this.firstName,
-    required this.isPresent,
     required this.lastName,
     required this.studentId,
   });
@@ -15,7 +13,6 @@ class Student {
   Map<String, dynamic> toMap() {
     return {
       'first_name': firstName,
-      'is_present': isPresent,
       'last_name': lastName,
       'student_id': studentId,
     };
@@ -25,7 +22,6 @@ class Student {
   factory Student.fromMap(Map<String, dynamic> map) {
     return Student(
       firstName: map['first_name'],
-      isPresent: map['is_present'],
       lastName: map['last_name'],
       studentId: map['student_id'],
     );

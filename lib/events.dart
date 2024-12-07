@@ -28,7 +28,7 @@ class _EventsPageState extends State<EventsPage>{
   @override
   void initState() {
     super.initState();
-    _streamEventsDB = _eventsDB.snapshots();
+    _streamEventsDB = _eventsDB.where('is_deleted', isEqualTo: false).snapshots();
   }
   @override
   Widget build(BuildContext context){
@@ -44,22 +44,22 @@ class _EventsPageState extends State<EventsPage>{
               return ListView.builder(
                 itemCount: streamSnapshot.data!.docs.length,
                 itemBuilder: (context, index) {
-                  final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[index];
-                  final String eventName = documentSnapshot['event_name'];
-                  final bool isOpen = documentSnapshot['is_open'];
+                  final Event eventModel = Event.fromMap(streamSnapshot.data!.docs as Map<String, dynamic>);
+                  // final String eventName = documentSnapshot['event_name'];
+                  // final bool isOpen = documentSnapshot['is_open'];
 
                   return Material(child: ListTile(
-                    title: Text(eventName),
+                    title: Text(eventModel.eventName),
                     subtitle: Row(
                       children: [
                         Icon(
                           Icons.circle,
-                          color: isOpen ? Colors.lightGreenAccent[400] : Colors.redAccent[700],
+                          color: eventModel.isOpen ? Colors.lightGreenAccent[400] : Colors.redAccent[700],
                           size: 10,
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-                          child: Text(isOpen ? "Open" : "Closed"),
+                          child: Text(eventModel.isOpen ? "Open" : "Closed"),
                         ),
                       ],
                     ),
@@ -67,7 +67,7 @@ class _EventsPageState extends State<EventsPage>{
                       onPressed: () {
 
                       }, 
-                      icon: Icon(Icons.edit)),
+                      icon: const Icon(Icons.edit)),
                   ));
               });
             }
@@ -259,10 +259,6 @@ class _EventFormState extends State<EventForm> {
                       venueController.text.isEmpty ||
                       organizerController.text.isEmpty
                     ) return;
-          
-                    // setState(() {
-                    //   _date = setTime(_date, _time);
-                    // });
           
                     Event event = Event(
                       eventName: eventNameController.text, 

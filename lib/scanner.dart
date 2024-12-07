@@ -108,7 +108,7 @@ class _ScannerPageState extends State<ScannerPage>{
                                             });
                                           }
                                     
-                                          return const Center(child: CircularProgressIndicator(),);
+                                          return const Center(child: CircularProgressIndicator());
                                     
                                         },
                                       ),
@@ -161,8 +161,8 @@ class _ScannerPageState extends State<ScannerPage>{
                 String output = barcodes.barcodes.first.displayValue!;
                 output = output.substring(1, output.length);
 
-                QuerySnapshot student = await _studentsDb.where('student_id', isEqualTo: output).get();
-                QuerySnapshot event = await _eventsDB.where('event_name', isEqualTo: _selectedEvent).get();
+                QuerySnapshot student = await _studentsDb.where('is_deleted', isEqualTo: false).where('student_id', isEqualTo: output).get();
+                QuerySnapshot event = await _eventsDB.where('is_deleted', isEqualTo: false).where('event_name', isEqualTo: _selectedEvent).get();
 
                 if(student.docs.isNotEmpty && event.docs.isNotEmpty){
 
@@ -203,13 +203,4 @@ class _ScannerPageState extends State<ScannerPage>{
     );
   }
 
-}
-
-String showSelectEventModal(BuildContext context){
-
-  String selectedEvent = "Select edvent";
-
-  
-
-  return selectedEvent;
 }
