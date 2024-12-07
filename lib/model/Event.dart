@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Event {
   String eventName;
   DateTime date;

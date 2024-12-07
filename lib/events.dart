@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/service/EventService.dart';
@@ -93,6 +94,7 @@ class EventForm extends StatefulWidget {
 
   const EventForm({super.key});
 
+
   @override
   State<StatefulWidget> createState() => _EventFormState();
 
@@ -102,6 +104,7 @@ class _EventFormState extends State<EventForm> {
 
   final CollectionReference _eventsDB = FirebaseFirestore.instance.collection('events');
   DateTime _date = DateTime.now();
+  TimeOfDay _time = TimeOfDay.now();
   final eventNameController = TextEditingController();
   final venueController = TextEditingController();
   final organizerController = TextEditingController();
@@ -112,133 +115,170 @@ class _EventFormState extends State<EventForm> {
     return Scaffold(
       appBar: const DefaultAppBar(),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.fromLTRB(40, 20, 40, 0),
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
-            child: Column(
-              children: [
-                const Row(
+          child: Column(
+            children: [
+              const Row(
+                children: [
+                  Text(
+                    "Event Name",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(fontSize: 24),
+                  ),
+                ],
+              ),
+              SizedBox(
+                width: 1000,
+                child: TextField(
+                  controller: eventNameController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0)
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(0,20,0,0),
+                child: Row(
                   children: [
                     Text(
-                      "Event Name",
+                      "Venue",
                       textAlign: TextAlign.left,
                       style: TextStyle(fontSize: 24),
                     ),
                   ],
                 ),
-                SizedBox(
-                  width: 1000,
-                  child: TextField(
-                    controller: eventNameController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0)
+              ),
+              SizedBox(
+                width: 1000,
+                child: TextField(
+                  controller: venueController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0)
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(0,20,0,0),
+                child: Row(
+                  children: [
+                    Text(
+                      "Organizer",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 24),
                     ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 1000,
+                child: TextField(
+                  controller: organizerController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0)
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(0,20,0,0),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Venue",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 1000,
-                  child: TextField(
-                    controller: venueController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0)
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(0,20,0,0),
+                child: Row(
+                  children: [
+                    Text(
+                      "Date",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 24),
                     ),
-                  ),
+                  ],
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(0,20,0,0),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Organizer",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 1000,
-                  child: TextField(
-                    controller: organizerController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0)
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(0,20,0,0),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Date",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 1000,
-                  child: TextField(
-                    readOnly: true,
-                    onTap: () async {
-                      final date = await showDatePickerDialog(
-                        context: context,
-                        minDate: DateTime(2021, 1, 1),
-                        maxDate: DateTime(2023, 12, 31),
-                      );
-                      setState(() {
-                        _date = date!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      hintText: "${_date.year}-${_date.month}-${_date.day}",
-                      contentPadding: const EdgeInsets.fromLTRB(10, 0, 10,0)
-                    ),
-                  ),
-                ),
-                OutlinedButton(
-                  onPressed: () {
+              ),
+              SizedBox(
+                width: 1000,
+                child: TextField(
+                  readOnly: true,
+                  onTap: () async {
+                    final date = await showDatePickerDialog(
+                      context: context,
+                      minDate: DateTime(2021, 1, 1),
+                      maxDate: DateTime(2100, 12, 31),
+                    );
                     setState(() {
-                      if(
-                        eventNameController.text.isEmpty || 
-                        venueController.text.isEmpty ||
-                        organizerController.text.isEmpty
-                      ) return;
-            
-                      Event event = Event(
-                        eventName: eventNameController.text, 
-                        date: _date, 
-                        organizer: organizerController.text, 
-                        venue: venueController.text, 
-                        isOpen: false
-                      );
-            
-                      _eventsDB.add(event.toMap());
-            
+                      _date = date!;
                     });
-                  }, 
-                  child: const Text("Submit")
+                  },
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: "${_date.year}-${_date.month}-${_date.day}",
+                    contentPadding: const EdgeInsets.fromLTRB(10, 0, 10,0)
+                  ),
                 ),
-              ],
-            ),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(0,20,0,0),
+                child: Row(
+                  children: [
+                    Text(
+                      "Time",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(fontSize: 24),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 1000,
+                child: TextField(
+                  readOnly: true,
+                  onTap: () async {
+                    
+                    showTimePicker(
+                      initialTime: TimeOfDay.now(),
+                      context: context,
+                    ).then((value) {
+                      setState(() {
+                        _time = value!;
+                      });
+                    });
+          
+                  },
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: _time.format(context),
+                    contentPadding: const EdgeInsets.fromLTRB(10, 0, 10,0)
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  setState(() {
+          
+                    if(
+                      eventNameController.text.isEmpty || 
+                      venueController.text.isEmpty ||
+                      organizerController.text.isEmpty
+                    ) return;
+          
+                    // setState(() {
+                    //   _date = setTime(_date, _time);
+                    // });
+          
+                    Event event = Event(
+                      eventName: eventNameController.text, 
+                      date: setTime(_date, _time), 
+                      organizer: organizerController.text, 
+                      venue: venueController.text, 
+                      isOpen: false
+                    );
+          
+                    _eventsDB.add(event.toMap());
+          
+                  });
+                }, 
+                child: const Text("Submit")
+              ),
+            ],
           ),
         )
       ),
@@ -256,4 +296,8 @@ void showAddEventModal(BuildContext context) {
     context,
     MaterialPageRoute(builder: (context) => const EventForm())
   );
+}
+
+DateTime setTime(DateTime dateTime, TimeOfDay time) {
+  return DateTime(dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
 }
