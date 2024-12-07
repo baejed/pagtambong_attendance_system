@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pagtambong_attendance_system/service/AttendanceService.dart';
 
 
 class ScannerPage extends StatefulWidget {
@@ -141,7 +142,7 @@ class _ScannerPageState extends State<ScannerPage>{
                   ),
                 );
               },
-              onDetect: (barcodes) {
+              onDetect: (barcodes) async {
                 if(_scanned) return;
                 if(_selectedEvent == "Select an event") {
                   Fluttertoast.showToast(
@@ -158,85 +159,27 @@ class _ScannerPageState extends State<ScannerPage>{
                 String output = barcodes.barcodes.first.displayValue!;
                 output = output.substring(1, output.length);
 
-                Query students = _studentsDb.where('student_id', isEqualTo: output);
-                Stream<QuerySnapshot> studentSnapshot = students.snapshots();
+                QuerySnapshot student = await _studentsDb.where('student_id', isEqualTo: output).get();
+                QuerySnapshot event = await _eventsDB.where('event_name', isEqualTo: _selectedEvent).get();
 
-                students.get().then((value) {
-                  if(value.docs.isNotEmpty){
-                    String firstName = value.docs.first['first_name'];
+                if(student.docs.isNotEmpty && event.docs.isNotEmpty){
+                  String firstName = student.docs.first['first_name'];
+                  DocumentReference studentDocRef = student.docs.first.reference;
+                  DocumentReference eventDocRef = event.docs.first.reference;
 
-                    setState(() {
-                      _scanned = true;
-                    });
+                  Fluttertoast.showToast(
+                    msg: firstName,
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.blue,
+                    textColor: Colors.white,
+                    fontSize: 16.0
+                  );
 
-                    showDialog(
-                      context: context, 
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                            title: Text("Confirmation"),
-                            content: Text(firstName),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  setState(() {
-                                    _scanned = false;
-                                  });
-                                },
-                                child: const Text("Okay"),
-                              )
-                            ],
-                          );
-                      }
-                    );
-                  }
-                });
+                  AttendanceService.makePresent(studentDocRef, eventDocRef);
 
-                // showDialog(
-                //   context: context, 
-                //   barrierDismissible: false,
-                //   builder: (BuildContext context) {
-
-
-                //     return StreamBuilder(
-                //       stream: studentSnapshot, 
-                //       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-
-                //         if(streamSnapshot.hasData && streamSnapshot.data!.docs.isNotEmpty){
-
-                //           String firstName = streamSnapshot.data!.docs.first['first_name'];
-
-                //           return AlertDialog(
-                //             title: Text("Confirmation"),
-                //             content: Text(firstName),
-                //             actions: [
-                //               TextButton(
-                //                 onPressed: () {
-                //                   Navigator.pop(context);
-                //                   setState(() {
-                //                     _scanned = false;
-                //                   });
-                //                 },
-                //                 child: Text("Okay"),
-                //               )
-                //             ],
-                //           );
-                          
-                //         }
-
-                //         if(streamSnapshot.connectionState == ConnectionState.waiting){
-                //           return AlertDialog(
-                //             title: Text("LOADING"),
-                //             content: Text("searching student"),
-                //           );
-                //         }
-
-                //         return SizedBox.shrink();
-
-                //       }
-                //     );
-                //   }
-                // );
+                }
 
                 setState(() {
                   _output = output;
@@ -263,39 +206,4 @@ String showSelectEventModal(BuildContext context){
   
 
   return selectedEvent;
-}
-
-bool _dialogBuilder(BuildContext context, String name) {
-
-  AlertDialog(
-    title: const Text('Basic dialog title'),
-    content: const Text(
-      'A dialog is a type of modal window that\n'
-      'appears in front of app content to\n'
-      'provide critical information, or prompt\n'
-      'for a decision to be made.',
-    ),
-    actions: <Widget>[
-      TextButton(
-        style: TextButton.styleFrom(
-          textStyle: Theme.of(context).textTheme.labelLarge,
-        ),
-        child: const Text('Disable'),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
-      TextButton(
-        style: TextButton.styleFrom(
-          textStyle: Theme.of(context).textTheme.labelLarge,
-        ),
-        child: const Text('Enable'),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
-    ],
-  );
-
-  return false;
 }
