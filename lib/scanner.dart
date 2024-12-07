@@ -94,7 +94,13 @@ class _ScannerPageState extends State<ScannerPage>{
                                               padding: const EdgeInsets.all(10),
                                               itemCount: streamSnapshot.data!.docs.length,
                                               itemBuilder: (context, index) {
-                                                Event eventModel = Event.fromMap(streamSnapshot.data!.docs.first as Map<String, dynamic>);
+                                                Event eventModel = Event(
+                                                  eventName: streamSnapshot.data!.docs[index]['event_name'],
+                                                  date: (streamSnapshot.data!.docs[index]['date'] as Timestamp).toDate(),
+                                                  isOpen: streamSnapshot.data!.docs[index]['is_open'],
+                                                  organizer: streamSnapshot.data!.docs[index]['organizer'],
+                                                  venue: streamSnapshot.data!.docs[index]['venue']
+                                                );
                                                 return Material(child: ListTile(
                                                   title: Text(eventModel.eventName),
                                                   subtitle: Text(eventModel.venue),  

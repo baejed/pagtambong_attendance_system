@@ -44,9 +44,13 @@ class _EventsPageState extends State<EventsPage>{
               return ListView.builder(
                 itemCount: streamSnapshot.data!.docs.length,
                 itemBuilder: (context, index) {
-                  final Event eventModel = Event.fromMap(streamSnapshot.data!.docs as Map<String, dynamic>);
-                  // final String eventName = documentSnapshot['event_name'];
-                  // final bool isOpen = documentSnapshot['is_open'];
+                  final Event eventModel = Event(
+                    eventName: streamSnapshot.data!.docs[index]['event_name'],
+                    date: (streamSnapshot.data!.docs[index]['date'] as Timestamp).toDate(),
+                    isOpen: streamSnapshot.data!.docs[index]['is_open'],
+                    organizer: streamSnapshot.data!.docs[index]['organizer'],
+                    venue: streamSnapshot.data!.docs[index]['venue']
+                  );
 
                   return Material(child: ListTile(
                     title: Text(eventModel.eventName),
@@ -65,7 +69,12 @@ class _EventsPageState extends State<EventsPage>{
                     ),
                     trailing: IconButton(
                       onPressed: () {
-
+                        // EventForm(editMode: true, docRef: streamSnapshot.data!.docs[index].reference);
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => EventForm(
+                          editMode: true, 
+                          docRef: streamSnapshot.data!.docs[index].reference, 
+                          event: eventModel
+                        )));
                       }, 
                       icon: const Icon(Icons.edit)),
                   ));
@@ -91,9 +100,11 @@ class _EventsPageState extends State<EventsPage>{
 }
 
 class EventForm extends StatefulWidget {
+  const EventForm({super.key, this.editMode = false, this.docRef, this.event});
 
-  const EventForm({super.key});
-
+  final bool editMode;
+  final DocumentReference? docRef;
+  final Event? event;
 
   @override
   State<StatefulWidget> createState() => _EventFormState();
@@ -111,6 +122,18 @@ class _EventFormState extends State<EventForm> {
 
   @override
   Widget build(BuildContext context) {
+
+    final bool edit = (widget.editMode && widget.docRef != null && widget.event != null);
+
+    if(edit){
+      eventNameController.text = widget.event!.eventName;
+      venueController.text = widget.event!.venue;
+      organizerController.text = widget.event!.organizer;
+      setState(() {
+        _date = widget.event!.date;
+        _time = TimeOfDay.fromDateTime(widget.event!.date);
+      });
+    }
     
     return Scaffold(
       appBar: const DefaultAppBar(),
@@ -132,9 +155,10 @@ class _EventFormState extends State<EventForm> {
                 width: 1000,
                 child: TextField(
                   controller: eventNameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0)
+                    contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0),
+                    // hintText: editMode ?  : "dasda"
                   ),
                 ),
               ),
@@ -252,25 +276,23 @@ class _EventFormState extends State<EventForm> {
               ),
               OutlinedButton(
                 onPressed: () {
-                  setState(() {
-          
-                    if(
+
+                  if(
                       eventNameController.text.isEmpty || 
                       venueController.text.isEmpty ||
                       organizerController.text.isEmpty
                     ) return;
-          
-                    Event event = Event(
+
+                  Event event = Event(
                       eventName: eventNameController.text, 
                       date: setTime(_date, _time), 
                       organizer: organizerController.text, 
                       venue: venueController.text, 
                       isOpen: false
-                    );
+                  );
           
-                    _eventsDB.add(event.toMap());
-          
-                  });
+                  edit ? EventService.updateEvent(event, widget.docRef!) : _eventsDB.add(event.toMap());
+                  
                 }, 
                 child: const Text("Submit")
               ),
