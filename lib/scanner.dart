@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pagtambong_attendance_system/model/Student.dart';
 import 'package:pagtambong_attendance_system/service/AttendanceService.dart';
 
 
@@ -162,10 +163,16 @@ class _ScannerPageState extends State<ScannerPage>{
                 QuerySnapshot student = await _studentsDb.where('student_id', isEqualTo: output).get();
                 QuerySnapshot event = await _eventsDB.where('event_name', isEqualTo: _selectedEvent).get();
 
+                
+
                 if(student.docs.isNotEmpty && event.docs.isNotEmpty){
-                  String firstName = student.docs.first['first_name'];
-                  DocumentReference studentDocRef = student.docs.first.reference;
-                  DocumentReference eventDocRef = event.docs.first.reference;
+
+                  QueryDocumentSnapshot studentQueryDoc = student.docs.first;
+                  Student studentModel = Student.fromMap(studentQueryDoc.data() as Map<String, dynamic>);
+
+                  String firstName = studentModel.firstName;
+                  DocumentReference studentDocRef = studentQueryDoc.reference;
+                  DocumentReference eventDocRef = studentQueryDoc.reference;
 
                   Fluttertoast.showToast(
                     msg: firstName,
