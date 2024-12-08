@@ -97,9 +97,26 @@ class EventService {
             }
           });
 
-          break;
+          continue;
 
         }
+
+        Query selectedStudents = studentQuery
+          .where('program', isEqualTo: program)
+          .where('year_level', isEqualTo: yrLvl);
+
+        selectedStudents.get().then((value) {
+          for(int i = 0; i < value.docs.length; i++) {
+              DocumentReference studentDocRef = value.docs[i].reference;
+              AttendanceItem attendanceItemModel = AttendanceItem.fromMap({
+                'event': eventDocRef,
+                'is_present': false,
+                'student': studentDocRef
+              });
+              
+              _attendanceItemDb.add(attendanceItemModel.toMap());
+            }
+        });
 
       }
     }

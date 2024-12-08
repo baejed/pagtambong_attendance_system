@@ -475,7 +475,7 @@ class _EventParticipantManager extends State<EventParticipantManager>{
                 }
               }
 
-              // ensures that the list only contains 'all'
+              // ensures that the list only contains 'all' if it is selected
               if(selectedYrLvl.contains(yrLvlIndexMap[0])) selectedYrLvl = List.filled(1, yrLvlIndexMap[0]!);
               if(selectedYrLvl.contains(Programs.allProgram)) selectedProgram = List.filled(1, Programs.allProgram);
 
