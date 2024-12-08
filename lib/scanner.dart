@@ -173,11 +173,12 @@ class _ScannerPageState extends State<ScannerPage>{
                 if(student.docs.isNotEmpty && event.docs.isNotEmpty){
 
                   QueryDocumentSnapshot studentQueryDoc = student.docs.first;
+                  QueryDocumentSnapshot eventQueryDoc = event.docs.first;
                   Student studentModel = Student.fromMap(studentQueryDoc.data() as Map<String, dynamic>);
 
                   String firstName = studentModel.firstName;
                   DocumentReference studentDocRef = studentQueryDoc.reference;
-                  DocumentReference eventDocRef = studentQueryDoc.reference;
+                  DocumentReference eventDocRef = eventQueryDoc.reference;
 
                   Fluttertoast.showToast(
                     msg: firstName,

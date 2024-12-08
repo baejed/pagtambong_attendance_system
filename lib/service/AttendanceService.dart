@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AttendanceService {
 
-  static final CollectionReference _attendanceDb = FirebaseFirestore.instance.collection('attendance-items');
+  static final CollectionReference _attendanceDb = FirebaseFirestore.instance.collection('attendance-item');
 
   static Future<void> makePresent(DocumentReference studentDocRef, DocumentReference eventDocRef) async {
     final QuerySnapshot attendanceItemQuery = await _attendanceDb
