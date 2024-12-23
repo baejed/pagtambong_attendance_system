@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/data/college_programs.dart';
 import 'package:pagtambong_attendance_system/model/AttendanceItem.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
@@ -31,6 +33,45 @@ class EventService {
     final map = event.toMap();
     map.putIfAbsent('is_deleted', () => false);
     await _eventDb.add(map);
+  }
+
+  static Future<void> addParticipant(DocumentReference eventDocRef, String idNumber) async {
+
+    DocumentReference? docRef;
+
+    await _studentsDb.where("student_id", isEqualTo: idNumber).get().then((val) {
+      if(val.docs.isEmpty) {
+        docRef = null;
+        return;
+      }
+      docRef = val.docs.first.reference;
+    });
+
+    if (docRef == null){
+      Fluttertoast.showToast(
+        msg: "Student not found",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+        fontSize: 16.0
+      );
+      return;
+    }
+
+    AttendanceItem attendanceItem = AttendanceItem(event: eventDocRef, isPresent: false, student: docRef!);
+    await _attendanceItemDb.add(attendanceItem.toMap());
+
+    Fluttertoast.showToast(
+      msg: "Participant successfuly added",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.blue,
+      textColor: Colors.white,
+      fontSize: 16.0
+    );
   }
 
   static Future<void> addParticipants(DocumentReference eventDocRef, List<String> participantsYrLvl, List<String> participantProgram) async {

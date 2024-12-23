@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/data/college_programs.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
+import 'package:pagtambong_attendance_system/model/AttendanceItem.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/service/EventService.dart';
 import 'package:provider/provider.dart';
@@ -56,6 +57,9 @@ class _EventsPageState extends State<EventsPage>{
 
                   return Material(child: ListTile(
                     title: Text(eventModel.eventName),
+                    onLongPress: () {
+                      EventService.toggleOpenEvent(eventModel.eventName);
+                    },
                     subtitle: Row(
                       children: [
                         Icon(
@@ -288,28 +292,6 @@ class _EventFormState extends State<EventForm> {
                   ),
                 ),
               ),
-              Padding(
-                padding: labelTextPaddingInsets,
-                child: Row(
-                  children: [
-                    Text(
-                      "Participants",
-                      textAlign: TextAlign.left,
-                      style: labelTextStyle,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 1000,
-                child: TextField(
-                  controller: organizerController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0)
-                  ),
-                ),
-              ),
               OutlinedButton(
                 onPressed: () {
 
@@ -458,6 +440,17 @@ class _EventParticipantManager extends State<EventParticipantManager>{
           ),
           TextButton(
             onPressed: () {
+              showDialog(
+                context: context, 
+                builder: (context) => Dialog(
+                  child: AddParticipantDialog(eventDocRef: widget.eventDocRef),
+                )
+              );
+            }, 
+            child: const Text("Add a participant")
+          ),
+          TextButton(
+            onPressed: () {
               List<String> selectedYrLvl = List.empty(growable: true);
               List<String> selectedProgram = List.empty(growable: true);
 
@@ -475,13 +468,14 @@ class _EventParticipantManager extends State<EventParticipantManager>{
                 }
               }
 
-              // ensures that the list only contains 'all' if it is selected
+              // ensures that the list only contains 'all' if it is
               if(selectedYrLvl.contains(yrLvlIndexMap[0])) selectedYrLvl = List.filled(1, yrLvlIndexMap[0]!);
               if(selectedYrLvl.contains(Programs.allProgram)) selectedProgram = List.filled(1, Programs.allProgram);
 
               EventService.addParticipants(widget.eventDocRef, selectedYrLvl, selectedProgram);
             }, 
-            child: const Text("Submit"))
+            child: const Text("Submit")
+          ),
         ],
       ),
       bottomNavigationBar: const DefaultBottomNavbar(index: 1),
@@ -499,4 +493,44 @@ void showAddEventModal(BuildContext context) {
 
 DateTime setTime(DateTime dateTime, TimeOfDay time) {
   return DateTime(dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
+}
+
+class AddParticipantDialog extends StatefulWidget {
+
+  const AddParticipantDialog({super.key, required this.eventDocRef});
+
+  final DocumentReference eventDocRef;
+
+  @override
+  State<StatefulWidget> createState() => _AddParticipantWidgetState();
+
+}
+
+class _AddParticipantWidgetState extends State<AddParticipantDialog> {
+
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextField(controller: _controller),
+        TextButton(
+          onPressed: () async {
+            await EventService.addParticipant(widget.eventDocRef, _controller.text.toString());
+            // Fluttertoast.showToast(
+            //   msg: "Student does not exist",
+            //   toastLength: Toast.LENGTH_SHORT,
+            //   gravity: ToastGravity.CENTER,
+            //   timeInSecForIosWeb: 1,
+            //   backgroundColor: Colors.blue,
+            //   textColor: Colors.white,
+            //   fontSize: 16.0
+            // );
+          },
+          child: const Text("Submit"))
+      ],
+    );
+  }
+
 }
