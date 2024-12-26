@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/data/college_programs.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
@@ -512,24 +513,35 @@ class _AddParticipantWidgetState extends State<AddParticipantDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(controller: _controller),
-        TextButton(
-          onPressed: () async {
-            await EventService.addParticipant(widget.eventDocRef, _controller.text.toString());
-            // Fluttertoast.showToast(
-            //   msg: "Student does not exist",
-            //   toastLength: Toast.LENGTH_SHORT,
-            //   gravity: ToastGravity.CENTER,
-            //   timeInSecForIosWeb: 1,
-            //   backgroundColor: Colors.blue,
-            //   textColor: Colors.white,
-            //   fontSize: 16.0
-            // );
-          },
-          child: const Text("Submit"))
-      ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 40, 20, 40),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(10, 0, 10,0),
+              labelText: "Student ID",
+            ),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(6)
+            ],
+            controller: _controller
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+            child: TextButton(
+              onPressed: () async {
+                await EventService.addParticipantWithId(widget.eventDocRef, _controller.text.toString());
+              },
+              child: const Text("Submit")),
+          )
+        ],
+      ),
     );
   }
 

@@ -35,19 +35,39 @@ class EventService {
     await _eventDb.add(map);
   }
 
-  static Future<void> addParticipant(DocumentReference eventDocRef, String idNumber) async {
+  static Future<void> addParticipantWithId(DocumentReference eventDocRef, String idNumber) async {
 
-    DocumentReference? docRef;
+    DocumentReference? studentDocRef;
+    bool attendanceItemExists = false;
 
     await _studentsDb.where("student_id", isEqualTo: idNumber).get().then((val) {
       if(val.docs.isEmpty) {
-        docRef = null;
+        studentDocRef = null;
         return;
       }
-      docRef = val.docs.first.reference;
+      studentDocRef = val.docs.first.reference;
     });
 
-    if (docRef == null){
+    await _attendanceItemDb.where('event', isEqualTo: eventDocRef).where('student', isEqualTo: studentDocRef).get().then((val) {
+      if(val.docs.isNotEmpty) {
+        attendanceItemExists = true;
+      }
+    });
+
+    if (attendanceItemExists) {
+      Fluttertoast.showToast(
+        msg: "Participant already added",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+        fontSize: 16.0
+      );
+      return;
+    }
+
+    if (studentDocRef == null){
       Fluttertoast.showToast(
         msg: "Student not found",
         toastLength: Toast.LENGTH_SHORT,
@@ -60,7 +80,7 @@ class EventService {
       return;
     }
 
-    AttendanceItem attendanceItem = AttendanceItem(event: eventDocRef, isPresent: false, student: docRef!);
+    AttendanceItem attendanceItem = AttendanceItem(event: eventDocRef, isPresent: false, student: studentDocRef!);
     await _attendanceItemDb.add(attendanceItem.toMap());
 
     Fluttertoast.showToast(
@@ -74,6 +94,22 @@ class EventService {
     );
   }
 
+  static Future<void> addParticipantWithStudentReference(DocumentReference eventDocRef, DocumentReference studentDocRef) async {
+
+    bool attendanceItemExists = false;
+
+    await _attendanceItemDb.where('event', isEqualTo: eventDocRef).where('student', isEqualTo: studentDocRef).get().then((val) {
+      if(val.docs.isNotEmpty) {
+        attendanceItemExists = true;
+      }
+    });
+
+    if (attendanceItemExists) return;
+
+    AttendanceItem attendanceItem = AttendanceItem(event: eventDocRef, isPresent: false, student: studentDocRef);
+    await _attendanceItemDb.add(attendanceItem.toMap());
+  }
+
   static Future<void> addParticipants(DocumentReference eventDocRef, List<String> participantsYrLvl, List<String> participantProgram) async {
 
     bool allProgram = participantProgram.contains(Programs.allProgram);
@@ -84,13 +120,7 @@ class EventService {
       studentQuery.get().then((value) {
         for(int i = 0; i < value.docs.length; i++){
           DocumentReference studentDocRef = value.docs[i].reference;
-          AttendanceItem attendanceItemModel = AttendanceItem.fromMap({
-            'event': eventDocRef,
-            'is_present': false,
-            'student': studentDocRef
-          });
-
-          _attendanceItemDb.add(attendanceItemModel.toMap());
+          addParticipantWithStudentReference(eventDocRef, studentDocRef);
         }
       });
 
@@ -107,13 +137,7 @@ class EventService {
           selectedProgramStudents.get().then((value) {
             for(int i = 0; i < value.docs.length; i++) {
               DocumentReference studentDocRef = value.docs[i].reference;
-              AttendanceItem attendanceItemModel = AttendanceItem.fromMap({
-                'event': eventDocRef,
-                'is_present': false,
-                'student': studentDocRef
-              });
-
-              _attendanceItemDb.add(attendanceItemModel.toMap());
+              addParticipantWithStudentReference(eventDocRef, studentDocRef);
             }
           });
 
@@ -128,13 +152,7 @@ class EventService {
           selectedYearLevelStudents.get().then((value) {
             for(int i = 0; i < value.docs.length; i++) {
               DocumentReference studentDocRef = value.docs[i].reference;
-              AttendanceItem attendanceItemModel = AttendanceItem.fromMap({
-                'event': eventDocRef,
-                'is_present': false,
-                'student': studentDocRef
-              });
-              
-              _attendanceItemDb.add(attendanceItemModel.toMap());
+              addParticipantWithStudentReference(eventDocRef, studentDocRef);
             }
           });
 
@@ -149,13 +167,7 @@ class EventService {
         selectedStudents.get().then((value) {
           for(int i = 0; i < value.docs.length; i++) {
               DocumentReference studentDocRef = value.docs[i].reference;
-              AttendanceItem attendanceItemModel = AttendanceItem.fromMap({
-                'event': eventDocRef,
-                'is_present': false,
-                'student': studentDocRef
-              });
-              
-              _attendanceItemDb.add(attendanceItemModel.toMap());
+              addParticipantWithStudentReference(eventDocRef, studentDocRef);
             }
         });
 
