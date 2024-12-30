@@ -3,9 +3,9 @@ import 'package:pagtambong_attendance_system/events.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
 import 'package:pagtambong_attendance_system/scanner.dart';
 
-class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget{
+class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   const DefaultAppBar({super.key});
-  
+
   final String title = "PAGTAMBONG";
 
   @override
@@ -15,7 +15,6 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
       title: Row(
         children: [
           const Image(
@@ -23,7 +22,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget{
             width: 40,
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+            padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
             child: Text(title),
           ),
         ],
@@ -32,53 +31,46 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget{
   }
 }
 
-class DefaultBottomNavbar extends StatelessWidget{
-  
+class DefaultBottomNavbar extends StatelessWidget {
   const DefaultBottomNavbar({super.key, required this.index});
 
   final int index;
 
-  void _onItemTapped(BuildContext context, int index){
-    if(index == this.index) return;
+  void _onItemTapped(BuildContext context, int index) {
+    if (index == this.index) return;
 
     // Navigator.pop(context);
 
     switch (index) {
       case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ScannerPage()));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const ScannerPage()));
         // Navigator.pop(context);
         break;
       case 1:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const EventsPage()));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const EventsPage()));
         break;
       case 2:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const PersonelPage()));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const PersonelPage()));
         break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return NavigationBar(
-      onDestinationSelected: (selectedIndex) => _onItemTapped(context, selectedIndex),
+      onDestinationSelected: (selectedIndex) =>
+          _onItemTapped(context, selectedIndex),
       indicatorColor: Colors.lightBlueAccent,
       selectedIndex: index,
       destinations: const <Widget>[
+        NavigationDestination(icon: Icon(Icons.camera_alt), label: "Scanner"),
         NavigationDestination(
-          icon: Icon(Icons.camera_alt),
-          label: "Scanner"
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.event_available_sharp),
-          label: "Events"
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.people_alt),
-          label: "Staffs"
-        )
+            icon: Icon(Icons.event_available_sharp), label: "Events"),
+        NavigationDestination(icon: Icon(Icons.people_alt), label: "Staffs")
       ],
     );
   }
-
 }

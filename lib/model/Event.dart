@@ -32,5 +32,4 @@ class Event {
       isOpen: data['is_open'] ?? '',
     );
   }
-
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:pagtambong_attendance_system/auth/login.dart';
 import 'package:pagtambong_attendance_system/events.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
 import 'firebase_options.dart';
 import 'scanner.dart';
 
 Future<void> main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Pagtambong'),
+      home: Login(),
     );
   }
 }
@@ -41,8 +41,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  List<Widget> destinations = [const ScannerPage(), const EventsPage(), const PersonelPage()];
+  List<Widget> destinations = [
+    const ScannerPage(),
+    const EventsPage(),
+    const PersonelPage()
+  ];
 
   @override
   Widget build(BuildContext context) {

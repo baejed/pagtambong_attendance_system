@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'pagtambong.firebasestorage.app',
     measurementId: 'G-D51DLEBH78',
   );
-
 }
