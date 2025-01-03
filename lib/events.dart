@@ -181,7 +181,7 @@ class _EventFormState extends State<EventForm> {
                   width: 1000,
                   child: TextField(
                     controller: eventNameController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0)),
                   ),
@@ -298,7 +298,9 @@ class _EventFormState extends State<EventForm> {
                     onPressed: () {
                       if (eventNameController.text.isEmpty ||
                           venueController.text.isEmpty ||
-                          organizerController.text.isEmpty) return;
+                          organizerController.text.isEmpty) {
+                        return;
+                      }
 
                       Event eventModel = Event(
                           eventName: eventNameController.text,
@@ -459,10 +461,12 @@ class _EventParticipantManager extends State<EventParticipantManager> {
                 }
 
                 // ensures that the list only contains 'all' if it is
-                if (selectedYrLvl.contains(yrLvlIndexMap[0]))
+                if (selectedYrLvl.contains(yrLvlIndexMap[0])) {
                   selectedYrLvl = List.filled(1, yrLvlIndexMap[0]!);
-                if (selectedYrLvl.contains(Programs.allProgram))
+                }
+                if (selectedYrLvl.contains(Programs.allProgram)) {
                   selectedProgram = List.filled(1, Programs.allProgram);
+                }
 
                 EventService.addParticipants(
                     widget.eventDocRef, selectedYrLvl, selectedProgram);
