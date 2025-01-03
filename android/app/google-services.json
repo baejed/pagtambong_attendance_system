@@ -12,7 +12,12 @@
           "package_name": "com.barcode.scanner"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "214065685114-o5mnuq7espef93v2ord2v48tru9fu3i8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pagtambongAttendanceSystem"
+              }
+            }
+          ]
         }
       }
     },
@@ -31,7 +48,12 @@
           "package_name": "com.barcode.scanner.barcode_scanner"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w"
@@ -39,7 +61,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "214065685114-o5mnuq7espef93v2ord2v48tru9fu3i8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pagtambongAttendanceSystem"
+              }
+            }
+          ]
         }
       }
     },
@@ -50,7 +84,12 @@
           "package_name": "com.example.pagtambong_attendance_s"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w"
@@ -58,7 +97,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "214065685114-o5mnuq7espef93v2ord2v48tru9fu3i8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pagtambongAttendanceSystem"
+              }
+            }
+          ]
         }
       }
     },
@@ -69,7 +120,20 @@
           "package_name": "com.example.pagtambong_attendance_system"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "214065685114-529i21hna13gdte6hjt0hh572s8cdjnt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pagtambong_attendance_system",
+            "certificate_hash": "014b3dc8a7bbf9c2151ffe37d643f8da6f04696b"
+          }
+        },
+        {
+          "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA_c2CLI_CHHSUDuPvHr8bw9069c9vqA5w"
@@ -77,7 +141,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "214065685114-o5mnuq7espef93v2ord2v48tru9fu3i8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pagtambongAttendanceSystem"
+              }
+            }
+          ]
         }
       }
     }

@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pagtambong_attendance_system/auth/signup.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
 
+import '../scanner.dart';
+
 class Login extends StatelessWidget {
   Login({super.key});
 
@@ -12,31 +14,14 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      bottomNavigationBar: _signup(context),
+      // bottomNavigationBar: _signup(context),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 50,
-        // leading: GestureDetector(
-        //   onTap: () {
-        //     Navigator.pop(context);
-        //   },
-        //   child: Container(
-        //     margin: const EdgeInsets.only(left: 10),
-        //     decoration: const BoxDecoration(
-        //         color: Color(0xffF7F7F9), shape: BoxShape.circle),
-        //     child: const Center(
-        //       child: Icon(
-        //         Icons.arrow_back_ios_new_rounded,
-        //         color: Colors.black,
-        //       ),
-        //     ),
-        //   ),
-        // ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -62,7 +47,9 @@ class Login extends StatelessWidget {
               const SizedBox(height: 50),
               _signIn(context),
               const SizedBox(height: 20),
-              _googleSignInButton(context)
+              _googleSignInButton(context),
+              const SizedBox(height: 20),
+              _googleSignOutButton(context),
             ],
           ),
         ),
@@ -160,6 +147,7 @@ class Login extends StatelessWidget {
     );
   }
 
+  // NOT USED
   Widget _signup(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -190,6 +178,37 @@ class Login extends StatelessWidget {
   }
 
   Widget _googleSignInButton(BuildContext context) {
-    return ElevatedButton(onPressed: () => AuthService().signInWithGoogle(), child: const Text("Google Sign In"));
+    return ElevatedButton(
+      onPressed: () async {
+        final user = await AuthService().signInWithGoogle();
+        if (user != null) {
+          if (!context.mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SignUp()),
+          );
+        }
+      },
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image(
+            image: AssetImage("assets/google_icon.png"),
+            height: 24,
+          ),
+          SizedBox(width: 12),
+          Text("Sign in with Google")
+        ],
+      ),
+    );
+  }
+
+  Widget _googleSignOutButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        await AuthService().signOut(context: context);
+      },
+      child: const Text("Sign Out"),
+    );
   }
 }

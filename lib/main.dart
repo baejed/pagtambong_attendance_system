@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
 import 'package:pagtambong_attendance_system/events.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
+import 'package:pagtambong_attendance_system/service/AuthService.dart';
 import 'firebase_options.dart';
 import 'scanner.dart';
 
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Pagtambong',
       theme: ThemeData(
