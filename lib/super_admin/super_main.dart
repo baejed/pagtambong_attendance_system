@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
+import 'package:pagtambong_attendance_system/service/LogService.dart';
 import 'package:pagtambong_attendance_system/service/UserManagement.dart';
 
 // For Testing Purposes Only
@@ -73,6 +76,7 @@ class _SuperAdminMain extends State<SuperAdminMain> {
 class ManageUsersScreen extends StatelessWidget {
   final UserManagement _userManagement = UserManagement();
   final TextEditingController _emailController = TextEditingController();
+  final logger = LogService();
 
   ManageUsersScreen({super.key});
 
@@ -102,7 +106,7 @@ class ManageUsersScreen extends StatelessWidget {
                     if (AuthService()
                         .isEmailAuthorized(_emailController.text)) {
                       _userManagement
-                          .updateUserRole(_emailController.text, role)
+                          .addPendingUser(_emailController.text, role)
                           .then((_) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -154,7 +158,7 @@ class ManageUsersScreen extends StatelessWidget {
                     child: CircularProgressIndicator(),
                   );
                 }
-
+                // logger.i("Snapshot: ${snapshot.data?.first.role}");
                 return ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (content, index) {
@@ -162,7 +166,7 @@ class ManageUsersScreen extends StatelessWidget {
                     return ListTile(
                       title: Text(user.email),
                       subtitle:
-                          Text('Role: ${user.role.toString().split('.').last}'),
+                          Text('Role: ${user.source}'),
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {

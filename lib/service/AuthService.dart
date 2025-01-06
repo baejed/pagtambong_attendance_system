@@ -73,13 +73,8 @@ class AuthService {
       // Check user role in Firestore
       final pendingUserDoc = await _firestore
           .collection("pending_users")
-          .doc(userCredential.user!.uid)
+          .doc(userCredential.user!.email)
           .get();
-
-      if (await checkUserCredential(userCredential, pendingUserDoc)) {
-        return await updateAndCheckUserRoleInFireStore(
-            userCredential, pendingUserDoc);
-      }
 
       // If not in pending_users, check if already in admin/staff
       final adminDoc = await _firestore
@@ -95,6 +90,11 @@ class AuthService {
           .get();
 
       if (staffDoc.exists) return UserRole.staff;
+
+      if (await checkUserCredential(userCredential, pendingUserDoc)) {
+        return await updateAndCheckUserRoleInFireStore(
+            userCredential, pendingUserDoc);
+      }
 
       return UserRole.user;
     } on FirebaseAuthException catch (e) {
@@ -115,20 +115,23 @@ class AuthService {
       );
     } catch (e) {
       // Empty Shit
+      signOut(context: null);
     }
     return null;
   }
 
   Future<void> signOut({
-    required BuildContext context,
+    required BuildContext? context,
   }) async {
     await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
     await Future.delayed(const Duration(seconds: 1));
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (BuildContext context) => Login()),
-    );
+    if (context != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => Login()),
+      );
+    }
   }
 
   // Google Sign In
@@ -152,18 +155,15 @@ class AuthService {
       final UserCredential userCredential =
           await _auth.signInWithCredential(credentials);
 
+      // LOGGING
+      logger.i("Email: ${userCredential.user!.email}, UID: ${userCredential.user!.uid}");
+
       // Check user role in Firestore
       final pendingUserDoc = await _firestore
           .collection("pending_users")
-          .doc(userCredential.user!.uid)
+          .doc(userCredential.user!.email)
           .get();
 
-      // TODO: Check if the account or user is authenticated
-      if (await checkUserCredential(userCredential, pendingUserDoc) &&
-          pendingUserDoc.exists) {
-        return await updateAndCheckUserRoleInFireStore(
-            userCredential, pendingUserDoc);
-      }
 
       // If not in pending_users, check if already in admin/staff
       final adminDoc = await _firestore
@@ -180,6 +180,12 @@ class AuthService {
 
       if (staffDoc.exists) return UserRole.staff;
 
+      // TODO: Check if the account or user is authenticated
+      if (await checkUserCredential(userCredential, pendingUserDoc)) {
+        return await updateAndCheckUserRoleInFireStore(
+            userCredential, pendingUserDoc);
+      }
+
       return UserRole
           .user; // Ambot unsay pulos ani na role para guro sa mga mysterious persons HAHAHAHA
     } catch (e) {
@@ -187,6 +193,7 @@ class AuthService {
       if (kDebugMode) {
         logger.e("Error Log", "Sign in Error: $e", StackTrace.current);
       }
+      signOut(context: null);
       return null;
     }
     // Sign In

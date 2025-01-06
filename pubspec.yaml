@@ -46,6 +46,8 @@ dependencies:
   firebase_auth: ^5.3.4
   google_sign_in: ^6.2.2
   logger: ^2.5.0
+  rxdart: ^0.28.0
+
 
 dev_dependencies:
   flutter_test:
