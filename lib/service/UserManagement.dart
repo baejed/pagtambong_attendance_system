@@ -1,9 +1,14 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
+import 'package:pagtambong_attendance_system/service/LogService.dart';
+import 'package:rxdart/rxdart.dart';
 
 class UserManagement {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final logger = LogService();
 
   Future<void> addPendingUser(String email, UserRole role) async {
     try {
@@ -16,7 +21,7 @@ class UserManagement {
           .where('email', isEqualTo: email)
           .get();
 
-      if (adminDoc.docs.isEmpty || staffDoc.docs.isEmpty) {
+      if (adminDoc.docs.isNotEmpty || staffDoc.docs.isNotEmpty) {
         throw 'User already exists in admin or staff collection';
       }
 
@@ -54,7 +59,6 @@ class UserManagement {
         .collection('staff')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
-
   }
 
   Future<void> updateUserRole(String userEmail, UserRole newRole) async {
@@ -82,10 +86,20 @@ class UserManagement {
 
   // Get all users and roles
   Stream<List<AppUser>> getAllUsers() {
-    return _firestore.collection('users').snapshots().map(
+    final adminStream = getAllAdmins().map((admins) => admins.map((data) => AppUser.fromFirestore(data, 'admin')).toList());
+    final staffStream = getAllStaffs().map((staff) => staff.map((data) => AppUser.fromFirestore(data, 'staff')).toList());
+    /*final value = adminStream.first.then((adminStream) {
+      logger.i("${adminStream.first.role}");
+    });*/
+    return Rx.combineLatest2(
+      adminStream,
+      staffStream,
+          (List<AppUser> admins, List<AppUser> staff) => [...admins, ...staff],
+    );
+    /*return _firestore.collection('users').snapshots().map(
           (snapshot) => snapshot.docs
               .map((doc) => AppUser.fromFirestore(doc.data()))
               .toList(),
-        );
+        );*/
   }
 }
