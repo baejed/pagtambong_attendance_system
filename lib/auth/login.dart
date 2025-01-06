@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pagtambong_attendance_system/auth/signup.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
+import 'package:pagtambong_attendance_system/super_admin/super_main.dart';
 
 import '../scanner.dart';
 
@@ -133,10 +134,17 @@ class Login extends StatelessWidget {
         elevation: 0,
       ),
       onPressed: () async {
-        await AuthService().signIn(
+        final user = await AuthService().signIn(
             email: _emailController.text,
             password: _passwordController.text,
             context: context);
+        if (user != null) {
+          if (!context.mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ManageUsersScreen()),
+          );
+        }
       },
       child: const Text(
         "Sign In",
@@ -185,7 +193,7 @@ class Login extends StatelessWidget {
           if (!context.mounted) return;
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => SignUp()),
+            MaterialPageRoute(builder: (context) => ManageUsersScreen()),
           );
         }
       },
