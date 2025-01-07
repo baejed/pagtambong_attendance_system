@@ -4,12 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/data/college_programs.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
+import 'package:pagtambong_attendance_system/model/AttendanceItem.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
+import 'package:pagtambong_attendance_system/model/Student.dart';
 import 'package:pagtambong_attendance_system/service/EventService.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
 
 // TODO: add feedback when adding an event, properly dispose the controllers
 
+// this is the main page of the page
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
 
@@ -55,6 +58,9 @@ class _EventsPageState extends State<EventsPage> {
                   return Material(
                       child: ListTile(
                     title: Text(eventModel.eventName),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => EventParticipantPage(eventDoc: eventDocRef, eventName: eventModel.eventName,)));
+                    },
                     onLongPress: () {
                       EventService.toggleOpenEvent(eventModel.eventName);
                     },
@@ -97,7 +103,7 @@ class _EventsPageState extends State<EventsPage> {
                                               event: eventModel,
                                               eventDocRef: eventDocRef)));
                             },
-                            icon: const Icon(Icons.people_alt_outlined)),
+                            icon: const Icon(Icons.group_add)),
                       ],
                     ),
                   ));
@@ -534,4 +540,111 @@ class _AddParticipantWidgetState extends State<AddParticipantDialog> {
       ),
     );
   }
+}
+
+class EventParticipantPage extends StatefulWidget {
+
+  const EventParticipantPage({super.key, required this.eventDoc, required this.eventName});
+
+  final DocumentReference eventDoc;
+  final String eventName;
+  
+  @override
+  State<StatefulWidget> createState() => _EventParticipantPageState();
+  
+}
+
+class _EventParticipantPageState extends State<EventParticipantPage> {
+
+  final CollectionReference attendanceItemDb = FirebaseFirestore.instance.collection('attendance-item');
+
+  @override
+  Widget build(BuildContext context) {
+
+    final Stream<QuerySnapshot> eventParticipantsStream = attendanceItemDb
+      .where('event', isEqualTo: widget.eventDoc)
+      .orderBy('student_id', descending: false)
+      .snapshots();
+
+    return Scaffold(
+      appBar: const DefaultAppBar(),
+      body: Center(
+        child: Column(
+          children: [
+            Text(widget.eventName),
+            Expanded(
+              child: StreamBuilder(
+                stream: eventParticipantsStream,
+                builder: (conext, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+                  if (streamSnapshot.hasData) {
+                    return ListView.builder(
+                      itemCount: streamSnapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        final docSnapshot = streamSnapshot.data!.docs[index];
+                        final Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
+                        final AttendanceItem attendanceItem = AttendanceItem.fromMap(data);
+
+                        return FutureBuilder(
+                          future: attendanceItem.student.get(), 
+                          builder: (context, futureSnapshot) {
+                            if (futureSnapshot.connectionState == ConnectionState.waiting) {
+                              // Show a loading indicator while fetching the student
+                              return const ListTile(
+                                title: Text("Loading student info..."),
+                              );
+                            }
+                    
+                            if (futureSnapshot.hasData && futureSnapshot.data != null) {
+                              final Map<String, dynamic> studentData = futureSnapshot.data!.data() as Map<String, dynamic>;
+                              final Student student = Student.fromMap(studentData);
+                    
+                              return ListTile(
+                                title: Text(student.firstName),
+                                subtitle: Text(student.studentId),
+                                trailing: (attendanceItem.isPresent) 
+                                  ? const Icon(
+                                    Icons.check,
+                                    color: Colors.green,
+                                  )
+                                  : null
+                                ,
+                              );
+                            }
+                    
+                            // Handle the case where no student data is found
+                            return const ListTile(
+                              title: Text("Student not found"),
+                            );
+                          }
+                        );
+                    
+                        // return Material(
+                        //   child: ListTile(
+                        //     title: Text(docSnapshot['is_present'].toString()),
+                        //   ),
+                        // );
+                    
+                      }
+                    );
+                  }
+                    
+                  if (streamSnapshot.connectionState == ConnectionState.waiting){
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                    
+                  return const Center(
+                    child: Text("No participants found"),
+                  );
+                }),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: const DefaultBottomNavbar(index: 1),
+    );
+
+  }
+
 }
