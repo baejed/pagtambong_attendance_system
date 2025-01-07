@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 class Event {
   String eventName;
   DateTime date;
@@ -22,6 +25,14 @@ class Event {
       'is_open': isOpen,
     };
   }
+
+  getFormatedDateTimeString() {
+    return DateFormat('MMMM d, yyyy, h:mm a').format(date); // Formats date like 'December 10, 2024'
+  }
+
+  // getFormatedTimeString() {
+  //   return DateFormat('h:mm a').format(date);
+  // }
 
   factory Event.fromMap(Map<String, dynamic> data) {
     return Event(

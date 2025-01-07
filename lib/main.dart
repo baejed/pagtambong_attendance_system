@@ -29,8 +29,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
+        bottomSheetTheme: const BottomSheetThemeData(
+          dragHandleColor: Color.fromARGB(255, 0, 66, 119)
+        )
       ),
-      home: Login(),
+      home: ScannerPage(),
     );
   }
 }

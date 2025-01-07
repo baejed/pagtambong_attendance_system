@@ -36,7 +36,7 @@ class _ScannerPageState extends State<ScannerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userRole = AuthService().getUserRole(currentUser!.uid); // Role of current user
+    // final userRole = AuthService().getUserRole(currentUser!.uid); // Role of current user
 
     return Scaffold(
       appBar: const DefaultAppBar(),
@@ -80,6 +80,8 @@ class _ScannerPageState extends State<ScannerPage> {
                           });
 
                           showModalBottomSheet<void>(
+                            backgroundColor: Colors.blue[700],
+                            showDragHandle: true,
                             context: context,
                             builder: (BuildContext context) {
                               final Stream<QuerySnapshot> streamEventsDB =
@@ -89,17 +91,18 @@ class _ScannerPageState extends State<ScannerPage> {
 
                               return Padding(
                                 padding:
-                                    const EdgeInsets.fromLTRB(0, 30, 0, 10),
+                                    const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                 child: SizedBox(
-                                  height: 200,
+                                  height: 300,
                                   child: StreamBuilder(
                                     stream: streamEventsDB,
                                     builder: (context,
                                         AsyncSnapshot<QuerySnapshot>
                                             streamSnapshot) {
                                       if (streamSnapshot.hasData) {
-                                        return ListView.builder(
-                                            padding: const EdgeInsets.all(10),
+                                        // Listview.separated is used for adding gaps
+                                        return ListView.separated(
+                                            // padding: const EdgeInsets.all(10),
                                             itemCount: streamSnapshot
                                                 .data!.docs.length,
                                             itemBuilder: (context, index) {
@@ -118,20 +121,32 @@ class _ScannerPageState extends State<ScannerPage> {
                                                   venue: streamSnapshot.data!
                                                       .docs[index]['venue']);
                                               return Material(
-                                                  child: ListTile(
-                                                title:
-                                                    Text(eventModel.eventName),
-                                                subtitle:
-                                                    Text(eventModel.venue),
-                                                onTap: () {
-                                                  setState(() {
-                                                    _selectedEvent =
-                                                        eventModel.eventName;
-                                                  });
-                                                  Navigator.pop(context);
-                                                },
-                                              ));
-                                            });
+                                                color: Colors.blue[700],
+                                                child: ListTile(
+                                                  title: Text(
+                                                    eventModel.eventName,
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.w500,
+                                                      fontSize: 20
+                                                    ),
+                                                  ),
+                                                  subtitle: Text(eventModel.getFormatedDateTimeString()),
+                                                  textColor: const Color.fromARGB(255, 0, 0, 0),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      _selectedEvent = eventModel.eventName;
+                                                    });
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                              );
+
+                                        }, separatorBuilder: (BuildContext context, int index) => const SizedBox(
+                                          height: 1,
+                                          child: DecoratedBox(decoration: BoxDecoration(
+                                            color: Color.fromARGB(255, 0, 42, 77),
+                                          )),
+                                          ));
                                       }
 
                                       return const Center(
