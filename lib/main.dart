@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
           dragHandleColor: Color.fromARGB(255, 0, 66, 119)
         )
       ),
-      home: ScannerPage(),
+      home: Login(),
     );
   }
 }
