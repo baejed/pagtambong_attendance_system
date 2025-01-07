@@ -39,21 +39,21 @@ class DefaultBottomNavbar extends StatelessWidget {
   void _onItemTapped(BuildContext context, int index) {
     if (index == this.index) return;
 
-    // Navigator.pop(context);
-
     switch (index) {
       case 0:
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const ScannerPage()));
-        // Navigator.pop(context);
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const ScannerPage()), (route) => false);
+        // Navigator.pushReplacement(context,
+        //     MaterialPageRoute(builder: (context) => const ScannerPage()));
         break;
       case 1:
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const EventsPage()));
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const EventsPage()), (route) => false);
+        // Navigator.pushReplacement(context,
+        //     MaterialPageRoute(builder: (context) => const EventsPage()));
         break;
       case 2:
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const PersonelPage()));
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const PersonelPage()), (route) => false);
+        // Navigator.pushReplacement(context,
+        //     MaterialPageRoute(builder: (context) => const PersonelPage()));
         break;
     }
   }

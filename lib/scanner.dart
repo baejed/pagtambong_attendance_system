@@ -31,8 +31,8 @@ class _ScannerPageState extends State<ScannerPage> {
       FirebaseFirestore.instance.collection('events');
 
   String _selectedEvent = "Select an event";
-  String _output = "none";
-  final bool _scanned = false;
+  String _output = "";
+  bool _scanned = false; // this variable does nothing but I don't wanna remove it cuz it might destroy something idk
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +73,12 @@ class _ScannerPageState extends State<ScannerPage> {
                     children: [
                       GestureDetector(
                         onTap: () {
+
+                          setState(() {
+                            // cleares the id number label when switching events
+                            _output = "";
+                          });
+
                           showModalBottomSheet<void>(
                             context: context,
                             builder: (BuildContext context) {
@@ -165,7 +171,7 @@ class _ScannerPageState extends State<ScannerPage> {
             );
           },
           onDetect: (barcodes) async {
-            if (_scanned) return;
+            if (_scanned) return; // useless var
             if (_selectedEvent == "Select an event") {
               Fluttertoast.showToast(
                   msg: "Please select an event",
@@ -178,7 +184,7 @@ class _ScannerPageState extends State<ScannerPage> {
               return;
             }
             String output = barcodes.barcodes.first.displayValue!;
-            output = output.substring(1, output.length);
+            output = output.substring(1, output.length); // removes the 's' from the scanned barcode
 
             QuerySnapshot student = await _studentsDb
                 .where('is_deleted', isEqualTo: false)
