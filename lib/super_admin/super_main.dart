@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
@@ -205,6 +206,7 @@ class ManageUsersScreen extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: const DefaultBottomNavbar(index: 3),
     );
   }
 }
