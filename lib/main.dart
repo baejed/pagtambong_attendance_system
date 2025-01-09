@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
@@ -33,7 +34,17 @@ class MyApp extends StatelessWidget {
           dragHandleColor: Color.fromARGB(255, 0, 66, 119)
         )
       ),
-      home: Login(),
+      // This is to check if the user is already logged in, then it will just proceed to scanner, else go to login (user is new)
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, AsyncSnapshot<User?> user) {
+          if (user.hasData) {
+            return const ScannerPage();
+          } else {
+            return Login();
+          }
+        },
+      ),
     );
   }
 }

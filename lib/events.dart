@@ -121,6 +121,9 @@ class _EventsPageState extends State<EventsPage> {
   }
 }
 
+
+
+// TODO: Need to use this EventForm for the editing of details of students
 class EventForm extends StatefulWidget {
   const EventForm({super.key, this.editMode = false, this.docRef, this.event});
 
@@ -488,6 +491,10 @@ DateTime setTime(DateTime dateTime, TimeOfDay time) {
   return DateTime(
       dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
 }
+
+
+
+
 
 class AddParticipantDialog extends StatefulWidget {
   const AddParticipantDialog({super.key, required this.eventDocRef});
