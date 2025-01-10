@@ -9,12 +9,22 @@ import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/scanner.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
 
-
 class AuthService {
   final logger = LogService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  GoogleSignInAccount? _currentUser;
+  User? _currUser;
+
+  Future<User?> getCurrUser() async {
+    if (_currUser != null) {
+      return _currUser;
+    } else {
+      // Optionally, you can fetch the current user from FirebaseAuth if _currUser is null
+      return FirebaseAuth.instance.currentUser;
+    }
+  }
 
   Future<void> signUp(
       {required String email,
@@ -70,6 +80,8 @@ class AuthService {
 
       await Future.delayed(const Duration(seconds: 1));
 
+      _currUser = userCredential.user;
+
       // Check user role in Firestore
       final pendingUserDoc = await _firestore
           .collection("pending_users")
@@ -116,6 +128,7 @@ class AuthService {
     } catch (e) {
       // Empty Shit
       signOut(context: null);
+      return null;
     }
     return null;
   }
@@ -155,15 +168,19 @@ class AuthService {
       final UserCredential userCredential =
           await _auth.signInWithCredential(credentials);
 
+      // _currentUser = userCredential.user as GoogleSignInAccount?;
+      _currUser = userCredential.user;
+      // logger.i("User Credential: ${userCredential.user}");
+      // logger.i("Current User: $_currUser");
+
       // LOGGING
-      logger.i("Email: ${userCredential.user!.email}, UID: ${userCredential.user!.uid}");
+      // logger.i("Email: ${userCredential.user!.email}, UID: ${userCredential.user!.uid}");
 
       // Check user role in Firestore
       final pendingUserDoc = await _firestore
           .collection("pending_users")
           .doc(userCredential.user!.email)
           .get();
-
 
       // If not in pending_users, check if already in admin/staff
       final adminDoc = await _firestore
@@ -186,8 +203,7 @@ class AuthService {
             userCredential, pendingUserDoc);
       }
 
-      return UserRole
-          .user; // Ambot unsay pulos ani na role para guro sa mga mysterious persons HAHAHAHA
+      return null; // Ambot unsay pulos ani na role para guro sa mga mysterious persons HAHAHAHA
     } catch (e) {
       Fluttertoast.showToast(msg: "Some error occurred: $e");
       if (kDebugMode) {
@@ -240,7 +256,6 @@ class AuthService {
 
   Future<bool> checkUserCredential(UserCredential userCredentials,
       DocumentSnapshot<Map<String, dynamic>> userDoc) async {
-
     if (!userDoc.exists) {
       Fluttertoast.showToast(
         msg: "Account is not yet signed up, please contact Super Admin",
@@ -250,10 +265,7 @@ class AuthService {
         textColor: Colors.white,
         fontSize: 14.0,
       );
-      await userCredentials.user!.delete();
-      await FirebaseAuth.instance.signOut();
-      await _googleSignIn.signOut();
-      _auth.signOut();
+      signOut(context: null);
       return false;
     }
 
@@ -261,15 +273,21 @@ class AuthService {
   }
 
   Future<UserRole> getUserRole(String uid) async {
-    final doc = await _firestore.collection("users").doc(uid).get();
-    if (!doc.exists) return UserRole.user;
-
-    return UserRole.values.firstWhere(
-      (e) => e.toString() == 'UserRole.${doc.data()?['role']}',
-      orElse: () => UserRole.user,
-    );
+    final adminDoc = await _firestore.collection("admin").doc(uid).get();
+    final staffDoc = await _firestore.collection("staff").doc(uid).get();
+    if (adminDoc.exists) {
+      return UserRole.admin;
+    } else if (staffDoc.exists) {
+      return UserRole.staff;
+    }
+    return UserRole.user;
   }
 
+  GoogleSignInAccount? getCurrentUser() {
+    return _currentUser;
+  }
+
+  //================= Helper Functions =================\\
   bool isEmailAuthorized(String email) {
     // Define the allowed domain
     const String allowedDomain = "@umindanao.edu.ph";

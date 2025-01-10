@@ -2,10 +2,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pagtambong_attendance_system/auth/signup.dart';
+import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
+import 'package:pagtambong_attendance_system/service/LogService.dart';
 import 'package:pagtambong_attendance_system/super_admin/super_main.dart';
 
 import '../scanner.dart';
+
+final logger = LogService();
 
 class Login extends StatelessWidget {
   Login({super.key});
@@ -78,9 +82,10 @@ class Login extends StatelessWidget {
               filled: true,
               hintText: 'exampleemail@domain.com',
               hintStyle: const TextStyle(
-                  color: Color(0xff6A6A6A),
-                  fontWeight: FontWeight.normal,
-                  fontSize: 14),
+                color: Color(0xff6A6A6A),
+                fontWeight: FontWeight.normal,
+                fontSize: 14,
+              ),
               fillColor: const Color(0xffF7F7F9),
               border: OutlineInputBorder(
                   borderSide: BorderSide.none,
@@ -189,11 +194,12 @@ class Login extends StatelessWidget {
     return ElevatedButton(
       onPressed: () async {
         final user = await AuthService().signInWithGoogle();
-        if (user != null) {
+        // logger.i("User: $user}");
+        if (user != null || user != UserRole.user) {
           if (!context.mounted) return;
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ManageUsersScreen()),
+            MaterialPageRoute(builder: (context) => const ScannerPage()),
           );
         }
       },
