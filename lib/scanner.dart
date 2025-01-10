@@ -65,7 +65,12 @@ class _ScannerPageState extends State<ScannerPage> {
                     child: Container(
                       width: scanWindowWidth,
                       height: scanWindowHeight,
-                      decoration: BoxDecoration(border: Border.all()),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.blue,
+                          width: 5.0
+                        ),
+                      ),
                       child: Text(_output),
                     ),
                   )),

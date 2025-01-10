@@ -104,8 +104,8 @@ class EventService {
       return;
     }
 
-    AttendanceItem attendanceItem = AttendanceItem(
-        event: eventDocRef, isPresent: false, student: studentDocRef!);
+    AttendanceItem attendanceItem = AttendanceItem(event: eventDocRef, isPresent: false, student: studentDocRef!, studentId: idNumber);
+    
     await _attendanceItemDb.add(attendanceItem.toMap());
 
     Fluttertoast.showToast(
@@ -121,6 +121,7 @@ class EventService {
   static Future<void> addParticipantWithStudentReference(
       DocumentReference eventDocRef, DocumentReference studentDocRef) async {
     bool attendanceItemExists = false;
+    String? idNumber;
 
     await _attendanceItemDb
         .where('event', isEqualTo: eventDocRef)
@@ -134,8 +135,11 @@ class EventService {
 
     if (attendanceItemExists) return;
 
-    AttendanceItem attendanceItem = AttendanceItem(
-        event: eventDocRef, isPresent: false, student: studentDocRef);
+    await studentDocRef.get().then((onValue) {
+        idNumber = onValue['student_id'];
+    });
+
+    AttendanceItem attendanceItem = AttendanceItem(event: eventDocRef, isPresent: false, student: studentDocRef, studentId: idNumber!);
     await _attendanceItemDb.add(attendanceItem.toMap());
   }
 
