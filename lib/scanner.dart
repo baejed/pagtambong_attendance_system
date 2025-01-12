@@ -1,15 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/model/Student.dart';
-import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/AttendanceService.dart';
-import 'package:pagtambong_attendance_system/service/AuthService.dart';
 
 class ScannerPage extends StatefulWidget {
   const ScannerPage({super.key});
@@ -75,7 +72,7 @@ class _ScannerPageState extends State<ScannerPage> {
                         onTap: () {
 
                           setState(() {
-                            // cleares the id number label when switching events
+                            // clears the id number label when switching events
                             _output = "";
                           });
 

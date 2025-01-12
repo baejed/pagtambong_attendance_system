@@ -7,6 +7,9 @@ import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/service/EventService.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
+import 'package:pagtambong_attendance_system/service/LogService.dart';
+import 'package:pagtambong_attendance_system/widgets/event_form.dart';
+
 
 // TODO: add feedback when adding an event, properly dispose the controllers
 
@@ -21,6 +24,7 @@ class _EventsPageState extends State<EventsPage> {
   final CollectionReference _eventsDB =
       FirebaseFirestore.instance.collection('events');
   late Stream<QuerySnapshot> _streamEventsDB;
+  LogService logger = LogService();
 
   @override
   void initState() {
@@ -112,16 +116,51 @@ class _EventsPageState extends State<EventsPage> {
       bottomNavigationBar: const DefaultBottomNavbar(index: 1),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const EventForm()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CustomEventForm(
+                        onSubmit: (Map<String, String> formData) {
+                          try {
+                            final DateTime date =
+                                DateTime.parse(formData['dates']!);
+                            logger.i("Date Type: ${date.runtimeType}");
+                            final TimeOfDay time =
+                                parseTimeString(formData['times']!);
+                            Event eventModel = Event(
+                              eventName: formData['eventName']!,
+                              venue: formData['venue']!,
+                              organizer: formData['organizer']!,
+                              date: setTime(date, time),
+                              isOpen: false,
+                            );
+                            EventService.addEvent(eventModel);
+
+                            Fluttertoast.showToast(
+                              msg: "Event successfully added",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.blue,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
+
+                            Navigator.pop(context);
+                          } catch (e) {
+                            logger.e("$e");
+                          }
+                          // logger.i("Date: ${formData['date']}");
+                          // logger.i("Time: ${formData['time']}");
+                        },
+                      )));
+          // Navigator.push(context, MaterialPageRoute(builder: (context) => const EventForm()));
         },
         child: const Icon(Icons.add),
       ),
     );
   }
 }
-
-
 
 // TODO: Need to use this EventForm for the editing of details of students
 class EventForm extends StatefulWidget {
@@ -492,9 +531,26 @@ DateTime setTime(DateTime dateTime, TimeOfDay time) {
       dateTime.year, dateTime.month, dateTime.day, time.hour, time.minute);
 }
 
+TimeOfDay parseTimeString(String timeString) {
+  // Split into time and period (AM/PM)
+  final parts = timeString.split(' ');
+  final timePart = parts[0];
+  final period = parts[1];
 
+  // Split hours and minutes
+  final timeComponents = timePart.split(':');
+  int hours = int.parse(timeComponents[0]);
+  final minutes = int.parse(timeComponents[1]);
 
+  // Convert to 24-hour format if PM
+  if (period == 'PM' && hours != 12) {
+    hours += 12;
+  } else if (period == 'AM' && hours == 12) {
+    hours = 0;
+  }
 
+  return TimeOfDay(hour: hours, minute: minutes);
+}
 
 class AddParticipantDialog extends StatefulWidget {
   const AddParticipantDialog({super.key, required this.eventDocRef});

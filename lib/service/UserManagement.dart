@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
@@ -10,7 +8,9 @@ class UserManagement {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final logger = LogService();
 
-  Future<void> addPendingUser(String email, UserRole role) async {
+  // TODO: Refactor this to accept year level as well as on the "Set Role" button function
+  // TODO: You know what, just refactor this to accept the AppUser Model to make it clean
+  /*Future<void> addPendingUser(String email, UserRole role) async {
     try {
       final adminDoc = await _firestore
           .collection('admin')
@@ -36,6 +36,42 @@ class UserManagement {
       await _firestore.collection('pending_users').doc(email).set({
         'email': email,
         'role': role.toString().split('.').last,
+        'createdAt': DateTime.now(),
+      });
+    } catch (e) {
+      // Add to logs please
+      rethrow;
+    }
+  }*/
+  Future<void> addPendingUser(AppUser user) async {
+    try {
+      final adminDoc = await _firestore
+          .collection('admin')
+          .where('email', isEqualTo: user.email)
+          .get();
+      final staffDoc = await _firestore
+          .collection('staff')
+          .where('email', isEqualTo: user.email)
+          .get();
+
+      if (adminDoc.docs.isNotEmpty || staffDoc.docs.isNotEmpty) {
+        throw 'User already exists in admin or staff collection';
+      }
+
+      // Check if in already pending
+      final pendingDoc =
+      await _firestore.collection('pending_users').doc(user.email).get();
+      if (pendingDoc.exists) {
+        throw 'User already in pending list';
+      }
+
+      // Add to collection
+      await _firestore.collection('pending_users').doc(user.email).set({
+        'firstName': user.firstName,
+        'lastName': user.lastName,
+        'email': user.email,
+        'role': user.role.toString().split('.').last,
+        'yearLevel': user.yearLevel.isNotEmpty ? user.yearLevel : "Not Specified",
         'createdAt': DateTime.now(),
       });
     } catch (e) {

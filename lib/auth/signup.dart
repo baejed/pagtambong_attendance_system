@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
-import 'package:pagtambong_attendance_system/service/AuthService.dart';
 
 class SignUp extends StatelessWidget {
   SignUp({super.key});
@@ -47,7 +46,7 @@ class SignUp extends StatelessWidget {
             const SizedBox(
               height: 50,
             ),
-            _signUp(context),
+            // _signUp(context),
           ],
         ),
       )),
@@ -118,7 +117,7 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  Widget _signUp(BuildContext context) {
+  /*Widget _signUp(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xff0D6EFD),
@@ -141,7 +140,7 @@ class SignUp extends StatelessWidget {
         ),
       ),
     );
-  }
+  }*/
 
   Widget _signIn(BuildContext context) {
     return Padding(

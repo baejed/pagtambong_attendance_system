@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pagtambong_attendance_system/model/PaginatedResult.dart';
 import 'package:pagtambong_attendance_system/model/Student.dart';
-import 'package:pagtambong_attendance_system/service/AuthService.dart';
 import 'package:pagtambong_attendance_system/service/EventService.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
-import 'package:pagtambong_attendance_system/service/UserManagement.dart';
 
 import 'generic_component.dart';
-import 'model/UserRoles.dart';
 
 class StudentPageScreenSomethingThatIDontEvenKnowWhatThisIsAnymorePleaseHelpMe
     extends StatefulWidget {
@@ -19,62 +17,126 @@ class StudentPageScreenSomethingThatIDontEvenKnowWhatThisIsAnymorePleaseHelpMe
   StudentPageScreenState createState() => StudentPageScreenState();
 }
 
+
 class StudentPageScreenState extends State<
     StudentPageScreenSomethingThatIDontEvenKnowWhatThisIsAnymorePleaseHelpMe> {
-  final UserManagement _userManagement = UserManagement();
   final TextEditingController _searchStudentController =
       TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final logger = LogService();
-  late final Stream<List<Student>> _studentList;
-  late final Stream<List<Student>> _resultList;
   Timer? _debounce;
 
+  // For the Pagination
+  int _currentPage = 1;
+  static const int _pageSize = 20;
+  bool _isLoading = false;
+  bool _hasMore = false;
+
   // This is for the search functionality, for further inquiries shut the fuck up
-  @override
-  void initState() {
-    super.initState();
-    _searchStudentController.addListener(_onSearchChanged);
-  }
-
-  @override
-  void didChangeDependencies() {
-    getClientStream();
-    super.didChangeDependencies();
-  }
-
-  getClientStream() async {
-    setState(() {
-      _studentList = EventService.getAllStudents();
+  void _setupScrollListener() {
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent * 0.8 &&
+          _isLoading &&
+          _hasMore) {
+        // Load More Data
+        _loadMoreData();
+      }
     });
   }
 
-  @override
-  void dispose() {
-    _searchStudentController.removeListener(_onSearchChanged);
-    _searchStudentController.dispose();
-    _debounce?.cancel();
-    super.dispose();
+  Future<void> _loadMoreData() async {
+    if (_isLoading || !_hasMore) return;
+
+    setState(() {
+      _isLoading = true;
+      _currentPage++;
+    });
+
+    // Load more shit
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    setState(() {
+      _isLoading = false;
+    });
   }
+
+  /*Future<void> _initializeData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    _cachedStudents = await EventService.getAllStudents().first;
+    _filteredStudents = _cachedStudents;
+
+    setState(() {
+      _isLoading = false;
+    });
+  }*/
+
+  /*void _buildSearchIndex() {
+    for (var student in _cachedStudents) {
+      final key = student.firstName[0].toLowerCase();
+      _searchIndex.putIfAbsent(key, () => []).add(student);
+    }
+  }*/
 
   void _onSearchChanged() {
     // Handle search input changes
     logger.i("Search input: ${_searchStudentController.text}");
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      setState(() {
+      /*if (!mounted) return;
 
+      final searchText = _searchStudentController.text.toLowerCase();
+
+      setState(() {
+        if (searchText.isEmpty) {
+          _filteredStudents = _cachedStudents;
+        } else {
+          // Search cached data
+          _filteredStudents = _cachedStudents.where((student) {
+            return student.firstName.toLowerCase().contains(searchText) ||
+                student.lastName.toLowerCase().contains(searchText) ||
+                student.studentId.toLowerCase().contains(searchText);
+          }).toList();
+        }
+      });*/
+      setState(() {
+        _currentPage = 1;
+        _hasMore = true;
       });
     });
   }
 
-  searchResultList() {
+  @override
+  void initState() {
+    super.initState();
+    // _initializeData();
+    // _buildSearchIndex();
+    _setupScrollListener();
+    _searchStudentController.addListener(_onSearchChanged);
+  }
+
+  /*@override
+  void didChangeDependencies() {
+    getClientStream();
+    super.didChangeDependencies();
+  }*/
+
+  /*getClientStream() async {
+    setState(() {
+      _studentList = EventService.getAllStudents();
+    });
+  }*/
+
+  /*searchResultList() {
     var showResults = [];
     if (_searchStudentController.text != "") {
     } else {
       // showResults = List.from(_studentList);
     }
-  }
-
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +159,7 @@ class StudentPageScreenState extends State<
                     ),
                   ),
                 ),
+
                 /// If you wanted to implement a filter for the search function, uncomment and change this to finalize
                 /*PopupMenuButton<UserRole>(
                   onSelected: (UserRole role) {
@@ -148,7 +211,55 @@ class StudentPageScreenState extends State<
 
           // List of all users
           Expanded(
-            child: StreamBuilder<List<Student>>(
+            child: StreamBuilder<PaginatedResult<Student>>(
+              stream: _searchStudentController.text.isEmpty
+                  ? EventService.getAllPaginatedStudents(
+                      page: _currentPage, pageSize: _pageSize)
+                  : EventService.getSearchResults(
+                      query: _searchStudentController.text,
+                      page: _currentPage,
+                      pageSize: _pageSize),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text("Error: ${snapshot.error}"),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final result = snapshot.data!;
+                _hasMore = result.hasMore;
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: result.items.length + (_hasMore ? 1 : 0),
+                  itemBuilder: (content, index) {
+                    if (index >= result.items.length) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    final student = result.items[index];
+                    return ListTile(
+                      title: Text("${student.firstName} ${student.lastName}"),
+                      subtitle:
+                          Text("${student.studentId}, ${student.yearLevel}"),
+                    );
+                  },
+                );
+              },
+            ),
+
+            // This is the old implementation of the shit
+            /*child: StreamBuilder<List<Student>>(
               stream: _studentList,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
@@ -174,8 +285,9 @@ class StudentPageScreenState extends State<
                       title: Text("${student.firstName} ${student.lastName}"),
                       subtitle:
                           Text('${student.studentId}, ${student.yearLevel}'),
+
                       /// Uncomment and change this after finalizing the functionality of editing student's info
-                      /*trailing: IconButton(
+                      */ /*trailing: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
                           // Show Role Edit Dialog
@@ -200,16 +312,25 @@ class StudentPageScreenState extends State<
                             ),
                           );
                         },
-                      ),*/
+                      ),*/ /*
                     );
                   },
                 );
               },
-            ),
+            ),*/
           ),
         ],
       ),
       bottomNavigationBar: const DefaultBottomNavbar(index: 2),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchStudentController.removeListener(_onSearchChanged);
+    _searchStudentController.dispose();
+    _scrollController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 }
