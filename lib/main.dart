@@ -31,9 +31,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
-        bottomSheetTheme: const BottomSheetThemeData(
-          dragHandleColor: Color.fromARGB(255, 0, 66, 119)
-        )
       ),
       // This is to check if the user is already logged in, then it will just proceed to scanner, else go to login (user is new)
       home: StreamBuilder(

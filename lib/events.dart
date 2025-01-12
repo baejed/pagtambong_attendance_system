@@ -7,6 +7,7 @@ import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:pagtambong_attendance_system/model/AttendanceItem.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/model/Student.dart';
+import 'package:pagtambong_attendance_system/resources/CheckgaColors.dart';
 import 'package:pagtambong_attendance_system/service/EventService.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
@@ -61,7 +62,14 @@ class _EventsPageState extends State<EventsPage> {
 
                   return Material(
                       child: ListTile(
-                    title: Text(eventModel.eventName),
+                    title: Text(
+                      eventModel.eventName,
+                      style: const TextStyle(
+                        color: AppColors.darkFontColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16
+                      ),
+                    ),
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => EventParticipantPage(eventDoc: eventDocRef, eventName: eventModel.eventName,)));
                     },
@@ -79,7 +87,12 @@ class _EventsPageState extends State<EventsPage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-                          child: Text(eventModel.isOpen ? "Open" : "Closed"),
+                          child: Text(
+                            eventModel.isOpen ? "Open" : "Closed",
+                            style: const TextStyle(
+                              color: AppColors.subtitleFontColor,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -96,7 +109,10 @@ class _EventsPageState extends State<EventsPage> {
                                           docRef: eventDocRef,
                                           event: eventModel)));
                             },
-                            icon: const Icon(Icons.edit)),
+                            icon: const Icon(
+                              Icons.edit,
+                              color: AppColors.acccentFontColor,
+                            )),
                         IconButton(
                             onPressed: () {
                               Navigator.push(
@@ -107,7 +123,10 @@ class _EventsPageState extends State<EventsPage> {
                                               event: eventModel,
                                               eventDocRef: eventDocRef)));
                             },
-                            icon: const Icon(Icons.group_add)),
+                            icon: const Icon(
+                              Icons.group_add,
+                              color: AppColors.acccentFontColor
+                            )),
                       ],
                     ),
                   ));

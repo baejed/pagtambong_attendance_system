@@ -30,6 +30,14 @@ class Event {
     return DateFormat('MMMM d, yyyy, h:mm a').format(date); // Formats date like 'December 10, 2024'
   }
 
+  getFormatedDateString() {
+    return DateFormat('MMMM d, yyyy').format(date); // Formats date like 'December 10, 2024'
+  }
+
+  getFormatedTimeString() {
+    return DateFormat('h:mm a').format(date); // Formats date like 'December 10, 2024'
+  }
+
   // getFormatedTimeString() {
   //   return DateFormat('h:mm a').format(date);
   // }

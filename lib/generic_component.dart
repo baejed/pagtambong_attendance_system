@@ -25,7 +25,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: CheckgaColors.mainColor,
+      backgroundColor: AppColors.mainColor,
       title: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
@@ -102,25 +102,25 @@ class DefaultBottomNavbar extends StatelessWidget {
       NavigationDestination(
         icon: Icon(
           Icons.qr_code,
-          color: index == 0 ? CheckgaColors.activeNavbarColor : null
+          color: index == 0 ? AppColors.activeNavbarColor : Colors.black
         ), // Scanner
         label: "",
       ),
       NavigationDestination(
         icon: Icon(Icons.event_available_sharp,
-        color: index == 1 ? CheckgaColors.activeNavbarColor : null
+        color: index == 1 ? AppColors.activeNavbarColor : Colors.black
       ), //Events
         label: "",
       ),
       NavigationDestination(
         icon: Icon(Icons.school,
-        color: index == 2 ? CheckgaColors.activeNavbarColor : null
+        color: index == 2 ? AppColors.activeNavbarColor : Colors.black
       ), // Students
         label: "",
       ),
       NavigationDestination(
         icon: Icon(Icons.people_alt,
-        color: index == 3 ? CheckgaColors.activeNavbarColor : null
+        color: index == 3 ? AppColors.activeNavbarColor : Colors.black
       ), // Staffs
         label: "",
       )
@@ -163,7 +163,7 @@ class DefaultBottomNavbar extends StatelessWidget {
               indicatorColor: const Color.fromARGB(0, 0, 0, 0), // no color
               selectedIndex: index,
               destinations: snapshot.data!,
-              backgroundColor: CheckgaColors.navbarColor,
+              backgroundColor: AppColors.navbarColor,
               height: 60,
             );
           }
