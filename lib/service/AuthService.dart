@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -5,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
+import 'package:pagtambong_attendance_system/model/PaginatedResult.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
-import 'package:pagtambong_attendance_system/scanner.dart';
+import 'package:pagtambong_attendance_system/service/CacheService.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
 
 class AuthService {
@@ -17,6 +20,154 @@ class AuthService {
   GoogleSignInAccount? _currentUser;
   User? _currUser;
 
+  // PAAAAAAAAAAAAAAAGIIIIIIIIIIIIIIIINAAAAAAAAAAAAAAAAATIIIIIIIIIIIOOOOOOOON \\
+  static final CollectionReference _usersDb =
+      FirebaseFirestore.instance.collection('admin');
+
+  static const int _batchSize = 100;
+  static final _cache = UserCache();
+
+  static final _usersController =
+      StreamController<PaginatedResult<AppUser>>.broadcast();
+  static final _searchController =
+      StreamController<PaginatedResult<AppUser>>.broadcast();
+
+  static Future<void> _loadUsers(
+      int page, int pageSize, String searchQuery) async {
+    try {
+      var cachedData = await _cache.getUsers();
+      if (cachedData.isNotEmpty) {
+        // Emit Shit
+        _emitPaginatedResults(cachedData, page, pageSize, searchQuery);
+      }
+      var freshData = await getAllUsersNotStream();
+      await _cache.saveUsers(freshData);
+      _emitPaginatedResults(freshData, page, pageSize, searchQuery);
+    } catch (e) {
+      _usersController.addError(e);
+    }
+  }
+
+  static Stream<PaginatedResult<AppUser>> getAllPaginatedUsers({
+    int page = 1,
+    int pageSize = 20,
+    String searchQuery = '',
+  }) {
+    _loadUsers(page, pageSize, searchQuery);
+    return _usersController.stream;
+  }
+
+  static Stream<PaginatedResult<AppUser>> getSearchResults({
+    required String query,
+    int page = 1,
+    int pageSize = 20,
+  }) {
+    _performSearch(query, page, pageSize);
+    return _searchController.stream;
+  }
+
+  static void _emitPaginatedResults(
+    List<AppUser> users,
+    int page,
+    int pageSize,
+    String searchQuery,
+  ) {
+    if (searchQuery.isNotEmpty) {
+      // Filter Users
+      users = _filterUsers(users, searchQuery);
+    }
+
+    final startIndex = (page - 1) * pageSize;
+    final endIndex = startIndex + pageSize;
+    final paginatedItems = users.length > startIndex
+        ? users.sublist(
+            startIndex,
+            endIndex > users.length ? users.length : endIndex,
+          )
+        : <AppUser>[];
+
+    final result = PaginatedResult<AppUser>(
+        items: paginatedItems,
+        total: users.length,
+        page: page,
+        pageSize: pageSize,
+        hasMore: endIndex < users.length);
+
+    _usersController.add(result);
+  }
+
+  static List<AppUser> _filterUsers(List<AppUser> users, String query) {
+    final lowerCaseQuery = query.toLowerCase();
+    return users
+        .where((user) =>
+            user.firstName!.toLowerCase().contains(lowerCaseQuery) ||
+            user.lastName!.toLowerCase().contains(lowerCaseQuery) ||
+            user.email.toLowerCase().contains(lowerCaseQuery))
+        .toList();
+  }
+
+  static Future<void> _performSearch(
+      String query, int page, int pageSize) async {
+    try {
+      final users = await _cache.getUsers();
+      final filteredUsers = _filterUsers(users, query);
+
+      final startIndex = (page - 1) * pageSize;
+      final endIndex = startIndex + pageSize;
+      final paginatedItems = filteredUsers.length > startIndex
+          ? filteredUsers.sublist(startIndex,
+              endIndex > filteredUsers.length ? filteredUsers.length : endIndex)
+          : <AppUser>[];
+      final result = PaginatedResult<AppUser>(
+          items: paginatedItems,
+          total: filteredUsers.length,
+          page: page,
+          pageSize: pageSize,
+          hasMore: endIndex < filteredUsers.length);
+
+      _searchController.add(result);
+    } catch (e) {
+      _searchController.addError(e);
+    }
+  }
+
+  static Future<void> addUsersByBatch(List<AppUser> newUsers) async {
+    for (var i = 0; i < newUsers.length; i += _batchSize) {
+      final end =
+          (i + _batchSize < newUsers.length) ? i + _batchSize : newUsers.length;
+      final batch = newUsers.sublist(i, end);
+
+      var cachedUsers = await _cache.getUsers();
+      cachedUsers.addAll(batch);
+      await _cache.saveUsers(cachedUsers);
+
+      _emitPaginatedResults(cachedUsers, 1, 20, '');
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
+  static Future<List<AppUser>> getAllUsersNotStream() async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    try {
+      // TODO: Get Admins and Staffs then return as List<AppUser>
+      final snapshot = await _usersDb.get();
+      final users = snapshot.docs.map((doc) {
+        return AppUser.fromMap(doc.data() as Map<String, dynamic>);
+      }).toList();
+      return users;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  static void dispose() {
+    _usersController.close();
+    _searchController.close();
+  }
+
+  // ======================================================================== \\
+
   Future<User?> getCurrUser() async {
     if (_currUser != null) {
       return _currUser;
@@ -26,7 +177,7 @@ class AuthService {
     }
   }
 
-  Future<void> signUp(
+/*  Future<void> signUp(
       {required String email,
       required String password,
       required BuildContext context}) async {
@@ -67,7 +218,7 @@ class AuthService {
     } catch (e) {
       // Empty Shit
     }
-  }
+  }*/
 
   Future<UserRole?> signIn({
     required String email,
@@ -168,13 +319,7 @@ class AuthService {
       final UserCredential userCredential =
           await _auth.signInWithCredential(credentials);
 
-      // _currentUser = userCredential.user as GoogleSignInAccount?;
       _currUser = userCredential.user;
-      // logger.i("User Credential: ${userCredential.user}");
-      // logger.i("Current User: $_currUser");
-
-      // LOGGING
-      // logger.i("Email: ${userCredential.user!.email}, UID: ${userCredential.user!.uid}");
 
       // Check user role in Firestore
       final pendingUserDoc = await _firestore
@@ -197,13 +342,12 @@ class AuthService {
 
       if (staffDoc.exists) return UserRole.staff;
 
-      // TODO: Check if the account or user is authenticated
       if (await checkUserCredential(userCredential, pendingUserDoc)) {
         return await updateAndCheckUserRoleInFireStore(
             userCredential, pendingUserDoc);
       }
 
-      return null; // Ambot unsay pulos ani na role para guro sa mga mysterious persons HAHAHAHA
+      return null;
     } catch (e) {
       Fluttertoast.showToast(msg: "Some error occurred: $e");
       if (kDebugMode) {
@@ -217,8 +361,9 @@ class AuthService {
   }
 
   Future<UserRole?> updateAndCheckUserRoleInFireStore(
-      UserCredential userCredential,
-      DocumentSnapshot<Map<String, dynamic>> pendingUserDoc) async {
+    UserCredential userCredential,
+    DocumentSnapshot<Map<String, dynamic>> pendingUserDoc,
+  ) async {
     final role = pendingUserDoc.data()?['role'];
 
     if (role == 'admin') {
