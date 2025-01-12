@@ -1,11 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
 import 'package:pagtambong_attendance_system/service/UserManagement.dart';
+import 'package:pagtambong_attendance_system/widgets/users_form.dart';
 
 // For Testing Purposes Only
 /*class SuperAdminMain extends StatefulWidget {
@@ -78,6 +77,7 @@ class ManageUsersScreen extends StatelessWidget {
   final UserManagement _userManagement = UserManagement();
   final TextEditingController _emailController = TextEditingController();
   final logger = LogService();
+  late final AppUser user;
 
   ManageUsersScreen({super.key});
 
@@ -98,16 +98,19 @@ class ManageUsersScreen extends StatelessWidget {
                   child: TextField(
                     controller: _emailController,
                     decoration: const InputDecoration(
-                      labelText: "User Email",
+                      labelText: "Search Users",
                     ),
                   ),
                 ),
-                PopupMenuButton<UserRole>(
+                /*PopupMenuButton<UserRole>(
                   onSelected: (UserRole role) {
+                    // TODO: After selecting role, invoke another PopeMenuButton to get the Year level of the user then set it to the AppUser Model
                     if (AuthService()
                         .isEmailAuthorized(_emailController.text)) {
+                      user.email = _emailController.text;
+                      user.role = role;
                       _userManagement
-                          .addPendingUser(_emailController.text, role)
+                          .addPendingUser(user)
                           .then((_) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -144,7 +147,7 @@ class ManageUsersScreen extends StatelessWidget {
                     onPressed: null,
                     child: Text("Set Role"),
                   ),
-                ),
+                ),*/
               ],
             ),
           ),
@@ -166,8 +169,7 @@ class ManageUsersScreen extends StatelessWidget {
                     final user = snapshot.data![index];
                     return ListTile(
                       title: Text(user.email),
-                      subtitle:
-                          Text('Role: ${user.source}'),
+                      subtitle: Text('Role: ${user.source}'),
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
@@ -207,6 +209,66 @@ class ManageUsersScreen extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: const DefaultBottomNavbar(index: 3),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            // TODO: Add Page for the detailed shit
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CustomUsersForm(
+                  onSubmit: (Map<String, String> formData) {
+                    try {
+                      AppUser userModel = AppUser(
+                        firstName: formData['firstName']!,
+                        lastName: formData['lastName']!,
+                        email: formData['email']!,
+                        uid: formData['uid'],
+                        role: formData['role']! == 'admin'
+                            ? UserRole.admin
+                            : UserRole.staff,
+                        yearLevel: {
+                              '1': '1st Year',
+                              '2': '2nd Year',
+                              '3': '3rd Year',
+                              '4': '4th Year'
+                            }[formData['yearLevel']] ??
+                            'Unknown',
+                        source: formData['role']!,
+                      );
+                      if (AuthService().isEmailAuthorized(userModel.email)) {
+                        _userManagement.addPendingUser(userModel).then((_) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("User Role added successfully!")),
+                          );
+                          // TODO: Need to implement catching an error for the GenericFormFields
+                          // so that when the email is invalid the form clears the text
+                          // we only check for um email in the users page
+                        }).catchError((error) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $error')),
+                          );
+                          _emailController.clear();
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('We only accept umindanao Email')),
+                        );
+                        _emailController.clear();
+                      }
+                    } catch (e) {
+                      logger.e("Error: $e");
+                    }
+                  },
+                  clearForm: () {
+                    _emailController.clear();
+                  },
+                ),
+              ),
+            );
+          }),
     );
   }
 }
