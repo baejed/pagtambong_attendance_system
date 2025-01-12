@@ -168,7 +168,7 @@ class ManageUsersScreen extends StatelessWidget {
                   itemBuilder: (content, index) {
                     final user = snapshot.data![index];
                     return ListTile(
-                      title: Text(user.email),
+                      title: Text("${user.firstName} ${user.lastName}"),
                       subtitle: Text('Role: ${user.source}'),
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
