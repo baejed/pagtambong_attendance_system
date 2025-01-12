@@ -1,5 +1,3 @@
-import 'package:pagtambong_attendance_system/service/LogService.dart';
-
 enum UserRole {
   admin,
   staff,
@@ -40,30 +38,18 @@ class AppUser {
   }
 
   factory AppUser.fromMap(Map<String, dynamic> map) {
+    final role = UserRole.values.firstWhere(
+          (e) => e.toString() == 'UserRole.${map['role']}',
+      orElse: () => UserRole.user);
+
     return AppUser(
       firstName: map['firstName'],
       lastName: map['lastName'],
       email: map['email'],
       uid: map['uid'],
-      role: map['role'],
+      role: role,
       yearLevel: map['yearLevel'],
       source: map['source'],
-    );
-  }
-
-  factory AppUser.fromFirestore(Map<String, dynamic> data, String source) {
-    final logger = LogService();
-    return AppUser(
-      firstName: data['firstName'],
-      lastName: data['lastName'],
-      email: data['email'],
-      uid: data['uid'],
-      role: UserRole.values.firstWhere(
-            (e) => e.toString() == 'UserRole.${data['role']}',
-        orElse: () => UserRole.user,
-      ),
-      source: source,
-      yearLevel: data['yearLevel'],
     );
   }
 }
