@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pagtambong_attendance_system/events.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
+import 'package:pagtambong_attendance_system/resources/CheckgaColors.dart';
 import 'package:pagtambong_attendance_system/scanner.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
@@ -16,7 +17,7 @@ final LogService logger = LogService();
 class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   const DefaultAppBar({super.key});
 
-  final String title = "PAGTAMBONG";
+  final String title = "CheckGa!";
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -24,18 +25,27 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.blue[300],
-      title: Row(
-        children: [
-          const Image(
-            image: AssetImage("assets/codes_logo.png"),
-            width: 40,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-            child: Text(title),
-          ),
-        ],
+      backgroundColor: CheckgaColors.mainColor,
+      title: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            const Image(
+              image: AssetImage("assets/codes_logo.png"),
+              width: 40,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -89,21 +99,30 @@ class DefaultBottomNavbar extends StatelessWidget {
     final User? currUser = await AuthService().getCurrUser();
     // logger.i("Current User Role: ${currUser?.uid}");
     List<Widget> destinations = [
-      const NavigationDestination(
-        icon: Icon(Icons.camera_alt),
-        label: "Scanner",
+      NavigationDestination(
+        icon: Icon(
+          Icons.qr_code,
+          color: index == 0 ? CheckgaColors.activeNavbarColor : null
+        ), // Scanner
+        label: "",
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.event_available_sharp),
-        label: "Events",
+      NavigationDestination(
+        icon: Icon(Icons.event_available_sharp,
+        color: index == 1 ? CheckgaColors.activeNavbarColor : null
+      ), //Events
+        label: "",
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.school),
-        label: "Students",
+      NavigationDestination(
+        icon: Icon(Icons.school,
+        color: index == 2 ? CheckgaColors.activeNavbarColor : null
+      ), // Students
+        label: "",
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.people_alt),
-        label: "Staffs",
+      NavigationDestination(
+        icon: Icon(Icons.people_alt,
+        color: index == 3 ? CheckgaColors.activeNavbarColor : null
+      ), // Staffs
+        label: "",
       )
     ];
 
@@ -138,11 +157,14 @@ class DefaultBottomNavbar extends StatelessWidget {
             return const Text("No destinations available");
           } else {
             return NavigationBar(
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
               onDestinationSelected: (selectedIndex) =>
-                  _onItemTapped(context, selectedIndex),
-              indicatorColor: Colors.lightBlueAccent,
+                _onItemTapped(context, selectedIndex),
+              indicatorColor: const Color.fromARGB(0, 0, 0, 0), // no color
               selectedIndex: index,
               destinations: snapshot.data!,
+              backgroundColor: CheckgaColors.navbarColor,
+              height: 60,
             );
           }
         });
