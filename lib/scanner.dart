@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/model/Student.dart';
+import 'package:pagtambong_attendance_system/resources/CheckgaColors.dart';
 import 'package:pagtambong_attendance_system/service/AttendanceService.dart';
 
 class ScannerPage extends StatefulWidget {
@@ -27,9 +30,10 @@ class _ScannerPageState extends State<ScannerPage> {
   final CollectionReference _eventsDB =
       FirebaseFirestore.instance.collection('events');
 
+  HashSet _scannedIdNums = HashSet();
   String _selectedEvent = "Select an event";
   String _output = "";
-  bool _scanned = false; // this variable does nothing but I don't wanna remove it cuz it might destroy something idk
+  bool _scanned = false; // this variable does something now
 
   @override
   Widget build(BuildContext context) {
@@ -57,19 +61,35 @@ class _ScannerPageState extends State<ScannerPage> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                      child: Align(
-                    child: Container(
-                      width: scanWindowWidth,
-                      height: scanWindowHeight,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.blue,
-                          width: 5.0
+                    child: Align(
+                      child: Container(
+                        width: scanWindowWidth,
+                        height: scanWindowHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent, // Transparent background to mimic a scanner window
+                          border: Border.all(
+                            color: Colors.blue, // Border color to resemble scanner outline
+                            width: 5.0,
+                          ),
+                          borderRadius: BorderRadius.circular(10), // Rounded corners
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26, // Subtle shadow to give it some depth
+                              offset: Offset(0, 2),
+                              blurRadius: 6.0,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          _output,
+                          style: const TextStyle(
+                            color: Colors.white, // Text color to stand out
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                      child: Text(_output),
                     ),
-                  )),
+                  ),
                   Column(
                     children: [
                       GestureDetector(
@@ -81,7 +101,7 @@ class _ScannerPageState extends State<ScannerPage> {
                           });
 
                           showModalBottomSheet<void>(
-                            backgroundColor: Colors.blue[700],
+                            backgroundColor: Colors.white,
                             showDragHandle: true,
                             context: context,
                             builder: (BuildContext context) {
@@ -122,20 +142,33 @@ class _ScannerPageState extends State<ScannerPage> {
                                                   venue: streamSnapshot.data!
                                                       .docs[index]['venue']);
                                               return Material(
-                                                color: Colors.blue[700],
+                                                color: Colors.white,
                                                 child: ListTile(
                                                   title: Text(
                                                     eventModel.eventName,
                                                     style: const TextStyle(
                                                       fontWeight: FontWeight.w500,
-                                                      fontSize: 20
+                                                      fontSize: 20,
+                                                      color: AppColors.darkFontColor
                                                     ),
                                                   ),
-                                                  subtitle: Text(eventModel.getFormatedDateTimeString()),
-                                                  textColor: const Color.fromARGB(255, 0, 0, 0),
+                                                  subtitle: Text(
+                                                    eventModel.getFormatedDateString(),
+                                                    style: const TextStyle(
+                                                      color: AppColors.subtitleFontColor
+                                                    ),
+                                                  ),
+                                                  trailing: Text(
+                                                    eventModel.getFormatedTimeString(),
+                                                    style: const TextStyle(
+                                                      color: AppColors.acccentFontColor,
+                                                      fontSize: 16
+                                                    ),
+                                                  ),
                                                   onTap: () {
                                                     setState(() {
                                                       _selectedEvent = eventModel.eventName;
+                                                      _scannedIdNums = HashSet();
                                                     });
                                                     Navigator.pop(context);
                                                   },
@@ -143,7 +176,7 @@ class _ScannerPageState extends State<ScannerPage> {
                                               );
 
                                         }, separatorBuilder: (BuildContext context, int index) => const SizedBox(
-                                          height: 1,
+                                          height: 0, //sets the border to 0
                                           child: DecoratedBox(decoration: BoxDecoration(
                                             color: Color.fromARGB(255, 0, 42, 77),
                                           )),
@@ -160,7 +193,10 @@ class _ScannerPageState extends State<ScannerPage> {
                           );
                         },
                         child: Container(
-                          color: Colors.blue[700],
+                          decoration: BoxDecoration(
+                            color: Colors.white, // Background color
+                            borderRadius: BorderRadius.circular(5), // Add rounded corners
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: GestureDetector(
@@ -170,10 +206,15 @@ class _ScannerPageState extends State<ScannerPage> {
                                     _selectedEvent,
                                     style: const TextStyle(
                                       fontSize: 20,
+                                      color: AppColors.darkFontColor,
+                                      fontWeight: FontWeight.w600
                                     ),
                                   ),
                                   const Spacer(),
-                                  const Icon(Icons.arrow_downward_rounded)
+                                  const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: AppColors.acccentFontColor,
+                                  ),
                                 ],
                               ),
                             ),
@@ -188,6 +229,9 @@ class _ScannerPageState extends State<ScannerPage> {
           },
           onDetect: (barcodes) async {
             if (_scanned) return; // useless var
+            setState(() {
+              _scanned = true;
+            });
             if (_selectedEvent == "Select an event") {
               Fluttertoast.showToast(
                   msg: "Please select an event",
@@ -197,10 +241,23 @@ class _ScannerPageState extends State<ScannerPage> {
                   backgroundColor: Colors.red,
                   textColor: Colors.white,
                   fontSize: 16.0);
+              setState(() {
+                _scanned = false;
+              });
               return;
             }
             String output = barcodes.barcodes.first.displayValue!;
             output = output.substring(1, output.length); // removes the 's' from the scanned barcode
+
+            if (_scannedIdNums.contains(output)){
+              setState(() {
+                _scanned = false;
+              });
+                  
+              return;
+            } else {
+              _scannedIdNums.add(output);
+            }
 
             QuerySnapshot student = await _studentsDb
                 .where('is_deleted', isEqualTo: false)
@@ -221,21 +278,24 @@ class _ScannerPageState extends State<ScannerPage> {
               DocumentReference studentDocRef = studentQueryDoc.reference;
               DocumentReference eventDocRef = eventQueryDoc.reference;
 
-              Fluttertoast.showToast(
-                  msg: firstName,
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.CENTER,
-                  timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.blue,
-                  textColor: Colors.white,
-                  fontSize: 16.0);
+              await AttendanceService.makePresent(studentDocRef, eventDocRef);
 
-              AttendanceService.makePresent(studentDocRef, eventDocRef);
+              Fluttertoast.showToast(
+                msg: firstName,
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.blue,
+                textColor: Colors.white,
+                fontSize: 16.0
+              );
+
             }
 
             setState(() {
               _output = output;
-              // _scanned = true;
+              _scannedIdNums = _scannedIdNums;
+              _scanned = false;
             });
           },
         );
