@@ -33,7 +33,6 @@ class _ScannerPageState extends State<ScannerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userRole = AuthService().getUserRole(currentUser!.uid); // Role of current user
 
     return Scaffold(
       appBar: const DefaultAppBar(),
