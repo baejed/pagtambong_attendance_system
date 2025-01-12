@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/events.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
@@ -95,7 +96,7 @@ class DefaultBottomNavbar extends StatelessWidget {
 
   // OOOOOOHHH So skeri, maybe this is my final destination, fuck you
   Future<List<Widget>> getFinalDestinations() async {
-    final User? currUser = await AuthService().getCurrUser();
+    // final User? currUser = await AuthService().getCurrUser();
     // logger.i("Current User Role: ${currUser?.uid}");
     List<Widget> destinations = [
       NavigationDestination(
@@ -126,7 +127,7 @@ class DefaultBottomNavbar extends StatelessWidget {
     ];
 
     // Checking the current role of the user then pop the shit out in the list
-    final role = await AuthService().getUserRole(currUser!.uid);
+    final role = Session.loggedRole;
     // logger.i("Current Role: $role");
     if (role == UserRole.staff) {
       // This is really just a hacky way of implementing the role-based pages since u used a List of Widgets to store the NavigationDestinations
