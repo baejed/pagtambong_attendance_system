@@ -7,9 +7,8 @@ class Session {
   static UserRole? loggedRole;
   static User? user;
 
-
   static initRole() async {
-  // if the user is null, it gets the user first
+    // if the user is null, it gets the user first
     if (user == null) {
       await initUser();
     }
@@ -19,5 +18,4 @@ class Session {
   static initUser() async {
     user = await AuthService().getCurrUser();
   }
-
 }
