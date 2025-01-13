@@ -195,10 +195,10 @@ class Login extends StatelessWidget {
     return ElevatedButton(
       onPressed: () async {
         final user = await AuthService().signInWithGoogle();
-        logger.i("User: $user}");
+        logger.i("User: $user");
         if (user != null || user != UserRole.user) {
           if (!context.mounted) return;
-          await Session.init();
+          // await Session.init();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ScannerPage()),
