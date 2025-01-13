@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/auth/signup.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
@@ -194,9 +195,10 @@ class Login extends StatelessWidget {
     return ElevatedButton(
       onPressed: () async {
         final user = await AuthService().signInWithGoogle();
-        // logger.i("User: $user}");
+        logger.i("User: $user}");
         if (user != null || user != UserRole.user) {
           if (!context.mounted) return;
+          await Session.initRole();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ScannerPage()),
