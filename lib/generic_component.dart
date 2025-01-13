@@ -128,7 +128,7 @@ class DefaultBottomNavbar extends StatelessWidget {
 
     // Checking the current role of the user then pop the shit out in the list
     final role = Session.loggedRole;
-    // logger.i("Current Role: $role");
+    logger.i("Current Role: $role");
     if (role == UserRole.staff) {
       // This is really just a hacky way of implementing the role-based pages since u used a List of Widgets to store the NavigationDestinations
       destinations.removeAt(3);

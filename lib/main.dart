@@ -14,7 +14,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  // await Session.init();
   runApp(const MyApp());
 }
 
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, AsyncSnapshot<User?> user) {
           if (user.hasData) {
-            /*return FutureBuilder(
+            return FutureBuilder(
               future: Session.initRole(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -43,13 +43,13 @@ class MyApp extends StatelessWidget {
                 } else if (snapshot.hasError) {
                   return const Center(child: Text("Error initializing role"),);
                 } else {
-                  UserRole? userRole = snapshot.data as UserRole?;
-                  logger.i("User Fucking Role: $userRole");
+                  // UserRole? userRole = snapshot.data as UserRole?;
+                  // logger.i("User Fucking Role: $userRole");
                   return const ScannerPage();
                 }
               },
-            );*/
-            return const ScannerPage();
+            );
+            // return const ScannerPage();
           } else{
             return Login();
           }
