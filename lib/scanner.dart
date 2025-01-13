@@ -300,6 +300,12 @@ class _ScannerPageState extends State<ScannerPage> {
           },
         );
       })),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          controller.toggleTorch();
+        },
+        child: const Icon(Icons.lightbulb_outlined),
+      ),
       bottomNavigationBar: const DefaultBottomNavbar(index: 0),
     );
   }
