@@ -198,7 +198,7 @@ class Login extends StatelessWidget {
         logger.i("User: $user}");
         if (user != null || user != UserRole.user) {
           if (!context.mounted) return;
-          await Session.initRole();
+          await Session.init();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ScannerPage()),
