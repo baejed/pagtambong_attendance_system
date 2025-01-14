@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
 import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/events.dart';
+import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
 import 'firebase_options.dart';
 import 'scanner.dart';
@@ -13,9 +14,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  await Session.initUser();
-  await Session.initRole();
 
   runApp(const MyApp());
 }
@@ -37,8 +35,22 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, AsyncSnapshot<User?> user) {
           if (user.hasData) {
+            /*return FutureBuilder(
+              future: Session.initRole(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(),);
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text("Error initializing role"),);
+                } else {
+                  UserRole? userRole = snapshot.data as UserRole?;
+                  logger.i("User Fucking Role: $userRole");
+                  return const ScannerPage();
+                }
+              },
+            );*/
             return const ScannerPage();
-          } else {
+          } else{
             return Login();
           }
         },
