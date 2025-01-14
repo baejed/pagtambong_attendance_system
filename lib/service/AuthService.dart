@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
+import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/model/PaginatedResult.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/CacheService.dart';
@@ -320,7 +321,7 @@ class AuthService {
           await _auth.signInWithCredential(credentials);
 
       _currUser = userCredential.user;
-
+      await Session.init();
       // Check user role in Firestore
       final pendingUserDoc = await _firestore
           .collection("pending_users")
@@ -343,16 +344,23 @@ class AuthService {
       if (staffDoc.exists) return UserRole.staff;
 
       if (await checkUserCredential(userCredential, pendingUserDoc)) {
+        _currUser = userCredential.user;
         return await updateAndCheckUserRoleInFireStore(
             userCredential, pendingUserDoc);
       }
 
       return null;
     } catch (e) {
-      Fluttertoast.showToast(msg: "Some error occurred: $e");
-      if (kDebugMode) {
-        logger.e("Error Log", "Sign in Error: $e", StackTrace.current);
-      }
+      Fluttertoast.showToast(
+        msg: "Some error occurred: $e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      logger.e("Error Log", "Sign in Error: $e", StackTrace.current);
       signOut(context: null);
       return null;
     }
