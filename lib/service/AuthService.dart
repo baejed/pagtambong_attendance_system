@@ -151,7 +151,6 @@ class AuthService {
     await Future.delayed(const Duration(seconds: 1));
 
     try {
-      // TODO: Get Admins and Staffs then return as List<AppUser>
       final snapshot = await _usersDb.get();
       final users = snapshot.docs.map((doc) {
         return AppUser.fromMap(doc.data() as Map<String, dynamic>);

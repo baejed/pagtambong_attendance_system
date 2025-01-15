@@ -6,7 +6,6 @@ enum UserRole {
 
 class AppUser {
   // TODO: Find a way to not use the source anymore since it is irrelevant
-  // TODO: I added first name and last name fields integrate it to other implementations
   late final String email;
   late final String? firstName;
   late final String? lastName;
