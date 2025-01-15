@@ -104,7 +104,7 @@ class ManageUsersScreen extends StatelessWidget {
                 ),
                 /*PopupMenuButton<UserRole>(
                   onSelected: (UserRole role) {
-                    // TODO: After selecting role, invoke another PopeMenuButton to get the Year level of the user then set it to the AppUser Model
+                    // TODO: After selecting role, invoke another PopMenuButton to get the Year level of the user then set it to the AppUser Model
                     if (AuthService()
                         .isEmailAuthorized(_emailController.text)) {
                       user.email = _emailController.text;
