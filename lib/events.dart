@@ -41,6 +41,7 @@ class _EventsPageState extends State<EventsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const DefaultAppBar(),
+      drawer: const DefaultDrawer(),
       body: Center(
           child: StreamBuilder(
         stream: _streamEventsDB,

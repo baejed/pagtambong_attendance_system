@@ -37,7 +37,7 @@ class Login extends StatelessWidget {
             children: [
               Center(
                 child: Text(
-                  "Hello Again",
+                  "Welcome to CheckGA!",
                   style: GoogleFonts.raleway(
                     textStyle: const TextStyle(
                         color: Colors.black,
@@ -54,8 +54,8 @@ class Login extends StatelessWidget {
               _signIn(context),
               const SizedBox(height: 20),
               _googleSignInButton(context),
-              const SizedBox(height: 20),
-              _googleSignOutButton(context),
+              // const SizedBox(height: 20),
+              // _googleSignOutButton(context),
             ],
           ),
         ),

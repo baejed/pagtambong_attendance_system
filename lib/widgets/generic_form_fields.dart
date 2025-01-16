@@ -165,7 +165,34 @@ class _GenericFormFieldsState extends State<GenericFormFields> {
                 ],
               ),
             );
-          } else {
+          } else if (field.isNumericOnly!){
+            // Add Shit
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    field.label,
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(
+                    width: 1000,
+                    child: TextField(
+                      controller: _controllers[field.key],
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          else {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
@@ -224,12 +251,14 @@ class _GenericFormFieldsState extends State<GenericFormFields> {
   }
 }
 
+// TODO: This is Urgent, just make this into an enum para dili na daghan ug parameters
 class FormFieldData {
   final String key;
   final String label;
   final bool isDateField;
   final bool isTimeField;
   final bool isChoiceField;
+  bool? isNumericOnly;
   final List<String>? dropdownOptions;
 
   FormFieldData({
@@ -239,5 +268,6 @@ class FormFieldData {
     required this.isTimeField,
     required this.isChoiceField,
     this.dropdownOptions,
-  });
+    isNumericOnly,
+  }) : isNumericOnly = isNumericOnly ?? false;
 }

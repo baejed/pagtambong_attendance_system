@@ -144,6 +144,7 @@ class StudentPageScreenState extends State<
       appBar: AppBar(
         title: const Text("Students Page"),
       ),
+      drawer: const DefaultDrawer(),
       body: Column(
         children: [
           // Add new admin/staff form
