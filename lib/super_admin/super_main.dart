@@ -84,9 +84,8 @@ class ManageUsersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Manage Users"),
-      ),
+      appBar: const DefaultAppBar(),
+      drawer: const DefaultDrawer(),
       body: Column(
         children: [
           // Add new admin/staff form

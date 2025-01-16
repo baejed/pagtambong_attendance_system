@@ -4,17 +4,19 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
 import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/events.dart';
-import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
+import 'package:pagtambong_attendance_system/service/LogService.dart';
 import 'firebase_options.dart';
 import 'scanner.dart';
+
+LogService logger = LogService();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // await Session.init();
+  await Session.init();
   runApp(const MyApp());
 }
 

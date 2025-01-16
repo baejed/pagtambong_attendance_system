@@ -138,6 +138,14 @@
           }
         },
         {
+          "client_id": "214065685114-m6q1e5e7f1qnm7hm4sehql0h4u62qabp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pagtambong_attendance_system",
+            "certificate_hash": "e4fe9d85afc87cc696b34ac091c9e86ef251af19"
+          }
+        },
+        {
           "client_id": "214065685114-3euvfcjun8gd4pb7d3ivsjb7trbtanmq.apps.googleusercontent.com",
           "client_type": 3
         }
