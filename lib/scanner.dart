@@ -266,8 +266,12 @@ class _ScannerPageState extends State<ScannerPage> {
               return;
             }
             String output = barcodes.barcodes.first.displayValue!;
-            output = output.substring(
-                1, output.length); // removes the 's' from the scanned barcode
+
+            output = output.substring(1, output.length); // removes the 's' from the scanned barcode
+
+            if (!RegExp(r'^\d{6}$').hasMatch(output) || !output.startsWith('1') || RegExp(r'[A-Za-z]').hasMatch(output)) {
+              return;
+            }
 
             if (_scannedIdNums.contains(output)) {
               setState(() {
@@ -358,7 +362,7 @@ class _ScannerPageState extends State<ScannerPage> {
                 ),
               );
             },
-            child: const Icon(Icons.add),
+            child: const Icon(Icons.person_add_alt),
           ),
           const SizedBox(
             width: 10,
