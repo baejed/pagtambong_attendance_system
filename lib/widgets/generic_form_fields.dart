@@ -21,6 +21,7 @@ class _GenericFormFieldsState extends State<GenericFormFields> {
   final Map<String, TimeOfDay> _selectedTime = {};
   final Map<String, String> _selectedDropdownValues = {};
   LogService logger = LogService();
+  double textFieldWidth = 800;
 
   @override
   void initState() {
@@ -54,164 +55,196 @@ class _GenericFormFieldsState extends State<GenericFormFields> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ...widget.fields.map((field) {
-          if (field.isDateField) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    field.label,
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(
-                    width: 1000,
-                    child: TextField(
-                      readOnly: true,
-                      onTap: () async {
-                        // logger.i("Selected Date: ${_selectedDates.values.first}");
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: _selectedDates[field.key],
-                          firstDate: DateTime(2021, 1, 1),
-                          lastDate: DateTime(2100, 12, 31),
-                        );
-                        // logger.i("The Date is: $date");
-                        if (date != null) {
-                          setState(() {
-                            _selectedDates[field.key] = date;
-                          });
-                        }
-                      },
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        hintText:
-                            "${_selectedDates[field.key]?.year}-${_selectedDates[field.key]?.month}-${_selectedDates[field.key]?.day}",
-                        contentPadding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            );
-          } else if (field.isTimeField) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    field.label,
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(
-                    width: 1000,
-                    child: TextField(
-                      readOnly: true,
-                      onTap: () async {
-                        showTimePicker(
-                          initialTime: TimeOfDay.now(),
-                          context: context,
-                        ).then((value) {
-                          setState(() {
-                            _selectedTime[field.key] = value!;
-                          });
-                        });
-                      },
-                      decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          hintText: _selectedTime[field.key]?.format(context),
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(10, 0, 10, 0)),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          } else if (field.isChoiceField) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    field.label,
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(
-                    width: 1000,
-                    child: DropdownButton<String>(
-                      value: _selectedDropdownValues[field.key],
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedDropdownValues[field.key] = newValue!;
-                        });
-                      },
-                      items: field.dropdownOptions!
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                  )
-                ],
-              ),
-            );
-          } else {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    field.label,
-                    textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(
-                    width: 1000,
-                    child: TextField(
-                      controller: _controllers[field.key],
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            );
-          }
-        }),
-        OutlinedButton(
-          onPressed: () {
-            final formData = <String, String>{};
-            for (var field in widget.fields) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(40, 20, 40, 0),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            ...widget.fields.map((field) {
               if (field.isDateField) {
-                formData[field.key] =
-                    _selectedDates[field.key]!.toIso8601String();
-              } else if (field.isChoiceField) {
-                formData[field.key] = _selectedDropdownValues[field.key]!;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        field.label,
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(
+                        width: textFieldWidth,
+                        child: TextField(
+                          readOnly: true,
+                          onTap: () async {
+                            // logger.i("Selected Date: ${_selectedDates.values.first}");
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedDates[field.key],
+                              firstDate: DateTime(2021, 1, 1),
+                              lastDate: DateTime(2100, 12, 31),
+                            );
+                            // logger.i("The Date is: $date");
+                            if (date != null) {
+                              setState(() {
+                                _selectedDates[field.key] = date;
+                              });
+                            }
+                          },
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText:
+                            "${_selectedDates[field.key]?.year}-${_selectedDates[field.key]?.month}-${_selectedDates[field.key]?.day}",
+                            contentPadding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                );
               } else if (field.isTimeField) {
-                formData[field.key] = _selectedTime[field.key]!.format(context);
-              } else {
-                formData[field.key] = _controllers[field.key]!.text;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        field.label,
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(
+                        width: textFieldWidth,
+                        child: TextField(
+                          readOnly: true,
+                          onTap: () async {
+                            showTimePicker(
+                              initialTime: TimeOfDay.now(),
+                              context: context,
+                            ).then((value) {
+                              setState(() {
+                                _selectedTime[field.key] = value!;
+                              });
+                            });
+                          },
+                          decoration: InputDecoration(
+                              border: const OutlineInputBorder(),
+                              hintText: _selectedTime[field.key]?.format(context),
+                              contentPadding:
+                              const EdgeInsets.fromLTRB(10, 0, 10, 0)),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else if (field.isChoiceField) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        field.label,
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(
+                        width: textFieldWidth,
+                        child: DropdownButton<String>(
+                          value: _selectedDropdownValues[field.key],
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedDropdownValues[field.key] = newValue!;
+                            });
+                          },
+                          items: field.dropdownOptions!
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              } else if (field.isNumericOnly!){
+                // Add Shit
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        field.label,
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(
+                        width: textFieldWidth,
+                        child: TextField(
+                          controller: _controllers[field.key],
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               }
-            }
-            // logger.i("Form Data: $formData");
-            widget.onSubmit(formData);
-          },
-          child: const Text("Submit"),
-        )
-      ],
+              else {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        field.label,
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(
+                        width: textFieldWidth,
+                        child: TextField(
+                          controller: _controllers[field.key],
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              }
+            }),
+            OutlinedButton(
+              onPressed: () {
+                final formData = <String, String>{};
+                for (var field in widget.fields) {
+                  if (field.isDateField) {
+                    formData[field.key] =
+                        _selectedDates[field.key]!.toIso8601String();
+                  } else if (field.isChoiceField) {
+                    formData[field.key] = _selectedDropdownValues[field.key]!;
+                  } else if (field.isTimeField) {
+                    formData[field.key] = _selectedTime[field.key]!.format(context);
+                  } else {
+                    formData[field.key] = _controllers[field.key]!.text;
+                  }
+                }
+                // logger.i("Form Data: $formData");
+                widget.onSubmit(formData);
+              },
+              child: const Text("Submit"),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -224,12 +257,14 @@ class _GenericFormFieldsState extends State<GenericFormFields> {
   }
 }
 
+// TODO: This is Urgent, just make this into an enum para dili na daghan ug parameters
 class FormFieldData {
   final String key;
   final String label;
   final bool isDateField;
   final bool isTimeField;
   final bool isChoiceField;
+  bool? isNumericOnly;
   final List<String>? dropdownOptions;
 
   FormFieldData({
@@ -239,5 +274,6 @@ class FormFieldData {
     required this.isTimeField,
     required this.isChoiceField,
     this.dropdownOptions,
-  });
+    isNumericOnly,
+  }) : isNumericOnly = isNumericOnly ?? false;
 }

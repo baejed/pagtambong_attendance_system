@@ -37,7 +37,7 @@ class Login extends StatelessWidget {
             children: [
               Center(
                 child: Text(
-                  "Hello Again",
+                  "Welcome to CheckGA!",
                   style: GoogleFonts.raleway(
                     textStyle: const TextStyle(
                         color: Colors.black,
@@ -54,8 +54,8 @@ class Login extends StatelessWidget {
               _signIn(context),
               const SizedBox(height: 20),
               _googleSignInButton(context),
-              const SizedBox(height: 20),
-              _googleSignOutButton(context),
+              // const SizedBox(height: 20),
+              // _googleSignOutButton(context),
             ],
           ),
         ),
@@ -148,7 +148,7 @@ class Login extends StatelessWidget {
           if (!context.mounted) return;
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ManageUsersScreen()),
+            MaterialPageRoute(builder: (context) => const ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject()),
           );
         }
       },
@@ -195,10 +195,10 @@ class Login extends StatelessWidget {
     return ElevatedButton(
       onPressed: () async {
         final user = await AuthService().signInWithGoogle();
-        logger.i("User: $user}");
-        if (user != null || user != UserRole.user) {
+        logger.i("User: $user");
+        if (user != null && user != UserRole.user) {
           if (!context.mounted) return;
-          await Session.init();
+          // await Session.init();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ScannerPage()),

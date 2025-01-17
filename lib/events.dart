@@ -41,6 +41,7 @@ class _EventsPageState extends State<EventsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const DefaultAppBar(),
+      drawer: const DefaultDrawer(),
       body: Center(
           child: StreamBuilder(
         stream: _streamEventsDB,
@@ -187,7 +188,7 @@ class _EventsPageState extends State<EventsPage> {
   }
 }
 
-// TODO: Need to use this EventForm for the editing of details of students
+
 class EventForm extends StatefulWidget {
   const EventForm({super.key, this.editMode = false, this.docRef, this.event});
 

@@ -1,21 +1,27 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
 import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/events.dart';
-import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/personel.dart';
+import 'package:pagtambong_attendance_system/service/LogService.dart';
 import 'firebase_options.dart';
 import 'scanner.dart';
+
+LogService logger = LogService();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await Session.init();
 
-  runApp(const MyApp());
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const MyApp()));
+
+  // runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -35,7 +41,7 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, AsyncSnapshot<User?> user) {
           if (user.hasData) {
-            /*return FutureBuilder(
+            return FutureBuilder(
               future: Session.initRole(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -43,13 +49,13 @@ class MyApp extends StatelessWidget {
                 } else if (snapshot.hasError) {
                   return const Center(child: Text("Error initializing role"),);
                 } else {
-                  UserRole? userRole = snapshot.data as UserRole?;
-                  logger.i("User Fucking Role: $userRole");
+                  // UserRole? userRole = snapshot.data as UserRole?;
+                  // logger.i("User Fucking Role: $userRole");
                   return const ScannerPage();
                 }
               },
-            );*/
-            return const ScannerPage();
+            );
+            // return const ScannerPage();
           } else{
             return Login();
           }

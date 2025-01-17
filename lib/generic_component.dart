@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/events.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
@@ -79,7 +80,9 @@ class DefaultBottomNavbar extends StatelessWidget {
       case 2:
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const StudentPageScreenSomethingThatIDontEvenKnowWhatThisIsAnymorePleaseHelpMe()),
+            MaterialPageRoute(
+                builder: (context) =>
+                    const StudentPageScreenSomethingThatIDontEvenKnowWhatThisIsAnymorePleaseHelpMe()),
             (route) => false);
         // Navigator.pushReplacement(context,
         //     MaterialPageRoute(builder: (context) => const PersonelPage()));
@@ -87,7 +90,7 @@ class DefaultBottomNavbar extends StatelessWidget {
       case 3:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => ManageUsersScreen()),
+          MaterialPageRoute(builder: (context) => const ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject()),
           (route) => false,
         );
         break;
@@ -100,28 +103,31 @@ class DefaultBottomNavbar extends StatelessWidget {
     // logger.i("Current User Role: ${currUser?.uid}");
     List<Widget> destinations = [
       NavigationDestination(
-        icon: Icon(
-          Icons.qr_code,
-          color: index == 0 ? AppColors.activeNavbarColor : Colors.black
-        ), // Scanner
+        icon: Icon(Icons.qr_code,
+            color: index == 0
+                ? AppColors.activeNavbarColor
+                : Colors.black), // Scanner
         label: "",
       ),
       NavigationDestination(
         icon: Icon(Icons.event_available_sharp,
-        color: index == 1 ? AppColors.activeNavbarColor : Colors.black
-      ), //Events
+            color: index == 1
+                ? AppColors.activeNavbarColor
+                : Colors.black), //Events
         label: "",
       ),
       NavigationDestination(
         icon: Icon(Icons.school,
-        color: index == 2 ? AppColors.activeNavbarColor : Colors.black
-      ), // Students
+            color: index == 2
+                ? AppColors.activeNavbarColor
+                : Colors.black), // Students
         label: "",
       ),
       NavigationDestination(
         icon: Icon(Icons.people_alt,
-        color: index == 3 ? AppColors.activeNavbarColor : Colors.black
-      ), // Staffs
+            color: index == 3
+                ? AppColors.activeNavbarColor
+                : Colors.black), // Staffs
         label: "",
       )
     ];
@@ -145,7 +151,7 @@ class DefaultBottomNavbar extends StatelessWidget {
         builder: (context, snapshot) {
           // Just a bunch of checks for error handling asynchronous process (too fucking complex imo)
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const  Center(
+            return const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                 strokeWidth: 6.0,
@@ -159,8 +165,9 @@ class DefaultBottomNavbar extends StatelessWidget {
             return NavigationBar(
               labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
               onDestinationSelected: (selectedIndex) =>
-                _onItemTapped(context, selectedIndex),
-              indicatorColor: const Color.fromARGB(0, 0, 0, 0), // no color
+                  _onItemTapped(context, selectedIndex),
+              indicatorColor: const Color.fromARGB(0, 0, 0, 0),
+              // no color
               selectedIndex: index,
               destinations: snapshot.data!,
               backgroundColor: AppColors.navbarColor,
@@ -168,5 +175,79 @@ class DefaultBottomNavbar extends StatelessWidget {
             );
           }
         });
+  }
+}
+
+class DefaultDrawer extends StatelessWidget {
+  const DefaultDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Colors.blue),
+            child: Text(
+              "CheckGA! Attendance",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          ListTile(
+            leading:  const Icon(Icons.account_circle),
+            title: const Text("Profile"),
+            onTap: () {
+              Fluttertoast.showToast(
+                msg: "Profile Page Clicked",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.blue,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+            },
+          ),
+          ListTile(
+            leading:  const Icon(Icons.settings),
+            title: const Text("Settings"),
+            onTap: () {
+              Fluttertoast.showToast(
+                msg: "Settings Page Clicked",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.blue,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+            },
+          ),
+
+          ListTile(
+            leading:  const Icon(Icons.logout),
+            title: const Text("Logout"),
+            onTap: () {
+              // logger.i("User Role: ${Session.loggedRole}");
+              AuthService().signOut(context: context);
+              Fluttertoast.showToast(
+                msg: "Logout The Shit out of You",
+                toastLength: Toast.LENGTH_LONG,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.blue,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+            },
+          ),
+
+        ],
+      ),
+    );
   }
 }

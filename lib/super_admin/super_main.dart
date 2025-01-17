@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
+import 'package:pagtambong_attendance_system/model/PaginatedResult.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
@@ -72,21 +75,83 @@ class _SuperAdminMain extends State<SuperAdminMain> {
   }
 }*/
 
+class ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject
+    extends StatefulWidget {
+  const ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject(
+      {super.key});
+
+  @override
+  State<StatefulWidget> createState() => ManageUsersScreen();
+}
+
 // Admin Page to Manager Users
-class ManageUsersScreen extends StatelessWidget {
+class ManageUsersScreen extends State<
+    ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject> {
   final UserManagement _userManagement = UserManagement();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _searchUserController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
   final logger = LogService();
   late final AppUser user;
 
-  ManageUsersScreen({super.key});
+  // For the Pagination
+  int _currentPage = 1;
+  static const int _pageSize = 20;
+  bool _isLoading = false;
+  bool _hasMore = false;
+
+  //  This is for the search functionality, for further inquiries shut the fuck up
+  void _setupScrollListener() {
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent * 0.8 &&
+          _isLoading &&
+          _hasMore) {
+        // Load More Data
+        _loadMoreData();
+      }
+    });
+  }
+
+  Future<void> _loadMoreData() async {
+    if (_isLoading || !_hasMore) return;
+
+    setState(() {
+      _isLoading = true;
+      _currentPage++;
+    });
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _currentPage = 1;
+        _hasMore = true;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // AuthService().logSampleData();
+    _setupScrollListener();
+    _searchUserController.addListener(_onSearchChanged);
+  } // ManageUsersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Manage Users"),
-      ),
+      appBar: const DefaultAppBar(),
+      drawer: const DefaultDrawer(),
       body: Column(
         children: [
           // Add new admin/staff form
@@ -96,7 +161,7 @@ class ManageUsersScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _emailController,
+                    controller: _searchUserController,
                     decoration: const InputDecoration(
                       labelText: "Search Users",
                     ),
@@ -104,7 +169,7 @@ class ManageUsersScreen extends StatelessWidget {
                 ),
                 /*PopupMenuButton<UserRole>(
                   onSelected: (UserRole role) {
-                    // TODO: After selecting role, invoke another PopeMenuButton to get the Year level of the user then set it to the AppUser Model
+                    // TODO: After selecting role, invoke another PopMenuButton to get the Year level of the user then set it to the AppUser Model
                     if (AuthService()
                         .isEmailAuthorized(_emailController.text)) {
                       user.email = _emailController.text;
@@ -154,22 +219,51 @@ class ManageUsersScreen extends StatelessWidget {
 
           // List of all users
           Expanded(
-            child: StreamBuilder<List<AppUser>>(
-              stream: _userManagement.getAllUsers(),
+            child: StreamBuilder<PaginatedResult<AppUser>>(
+              stream: _searchUserController.text.isEmpty
+                  ? AuthService.getAllPaginatedUsers(
+                      page: _currentPage, pageSize: _pageSize)
+                  : AuthService.getSearchResults(
+                      query: _searchUserController.text,
+                      page: _currentPage,
+                      pageSize: _pageSize),
               builder: (context, snapshot) {
+                // TODO: There is an error parsing the enum UserRole, please fix ASAP
+                if (snapshot.hasError) {
+                  // logger.i("SnapShot Type: ${snapshot.runtimeType}");
+                  logger.e("Error: $snapshot");
+                  return Center(
+                    child: Text("Error: ${snapshot.error}"),
+                  );
+                }
                 if (!snapshot.hasData) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
-                // logger.i("Snapshot: ${snapshot.data?.first.role}");
+
+                final result = snapshot.data!;
+                logger.i("Result: ${result.items}");
+                _hasMore = result.hasMore;
+
+                logger.i("Snapshot: ${result.items.first}");
                 return ListView.builder(
-                  itemCount: snapshot.data!.length,
+                  controller: _scrollController,
+                  itemCount: result.items.length + (_hasMore ? 1 : 0),
                   itemBuilder: (content, index) {
-                    final user = snapshot.data![index];
+                    if (index >= result.items.length) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+                    final user = result.items[index];
+                    logger.i("Uset Name: ${user.firstName} ${user.lastName}");
                     return ListTile(
                       title: Text("${user.firstName} ${user.lastName}"),
-                      subtitle: Text('Role: ${user.source}'),
+                      subtitle: Text('Role: ${user.role.name}'),
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
@@ -185,7 +279,7 @@ class ManageUsersScreen extends StatelessWidget {
                                 children: UserRole.values.map((role) {
                                   return ListTile(
                                     title:
-                                        Text(role.toString().split('.').last),
+                                        Text(role.toJson()),
                                     onTap: () {
                                       _userManagement.updateUserRole(
                                         user.email,

@@ -14,10 +14,11 @@ import 'CacheService.dart';
 class EventService {
   static final CollectionReference _eventDb =
       FirebaseFirestore.instance.collection('events');
+  static final CollectionReference _attendanceItemDb =
+  FirebaseFirestore.instance.collection('attendance-item');
+
   static final CollectionReference _studentsDb =
       FirebaseFirestore.instance.collection('student-info');
-  static final CollectionReference _attendanceItemDb =
-      FirebaseFirestore.instance.collection('attendance-item');
 
   // For Cache and Paginating variables
   static const int _batchSize = 100;

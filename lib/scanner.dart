@@ -10,6 +10,10 @@ import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/model/Student.dart';
 import 'package:pagtambong_attendance_system/resources/CheckgaColors.dart';
 import 'package:pagtambong_attendance_system/service/AttendanceService.dart';
+import 'package:pagtambong_attendance_system/service/LogService.dart';
+import 'package:pagtambong_attendance_system/widgets/generic_form_fields.dart';
+
+LogService logger = LogService();
 
 class ScannerPage extends StatefulWidget {
   const ScannerPage({super.key});
@@ -22,9 +26,10 @@ class _ScannerPageState extends State<ScannerPage> {
   final MobileScannerController controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
+
   // TODO: Check the currently signed in user and implement shit according to role
   final currentUser = FirebaseAuth.instance.currentUser;
-  
+
   final CollectionReference _studentsDb =
       FirebaseFirestore.instance.collection('student-info');
   final CollectionReference _eventsDB =
@@ -37,9 +42,9 @@ class _ScannerPageState extends State<ScannerPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: const DefaultAppBar(),
+      drawer: const DefaultDrawer(),
       body: Center(child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
         final Size layoutSize = constraints.biggest;
@@ -66,15 +71,19 @@ class _ScannerPageState extends State<ScannerPage> {
                         width: scanWindowWidth,
                         height: scanWindowHeight,
                         decoration: BoxDecoration(
-                          color: Colors.transparent, // Transparent background to mimic a scanner window
+                          color: Colors.transparent,
+                          // Transparent background to mimic a scanner window
                           border: Border.all(
-                            color: Colors.blue, // Border color to resemble scanner outline
+                            color: Colors.blue,
+                            // Border color to resemble scanner outline
                             width: 5.0,
                           ),
-                          borderRadius: BorderRadius.circular(10), // Rounded corners
+                          borderRadius: BorderRadius.circular(10),
+                          // Rounded corners
                           boxShadow: const [
                             BoxShadow(
-                              color: Colors.black26, // Subtle shadow to give it some depth
+                              color: Colors.black26,
+                              // Subtle shadow to give it some depth
                               offset: Offset(0, 2),
                               blurRadius: 6.0,
                             ),
@@ -94,7 +103,6 @@ class _ScannerPageState extends State<ScannerPage> {
                     children: [
                       GestureDetector(
                         onTap: () {
-
                           setState(() {
                             // clears the id number label when switching events
                             _output = "";
@@ -111,8 +119,7 @@ class _ScannerPageState extends State<ScannerPage> {
                                       .snapshots();
 
                               return Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                 child: SizedBox(
                                   height: 300,
                                   child: StreamBuilder(
@@ -147,40 +154,51 @@ class _ScannerPageState extends State<ScannerPage> {
                                                   title: Text(
                                                     eventModel.eventName,
                                                     style: const TextStyle(
-                                                      fontWeight: FontWeight.w500,
-                                                      fontSize: 20,
-                                                      color: AppColors.darkFontColor
-                                                    ),
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        fontSize: 20,
+                                                        color: AppColors
+                                                            .darkFontColor),
                                                   ),
                                                   subtitle: Text(
-                                                    eventModel.getFormatedDateString(),
+                                                    eventModel
+                                                        .getFormatedDateString(),
                                                     style: const TextStyle(
-                                                      color: AppColors.subtitleFontColor
-                                                    ),
+                                                        color: AppColors
+                                                            .subtitleFontColor),
                                                   ),
                                                   trailing: Text(
-                                                    eventModel.getFormatedTimeString(),
+                                                    eventModel
+                                                        .getFormatedTimeString(),
                                                     style: const TextStyle(
-                                                      color: AppColors.acccentFontColor,
-                                                      fontSize: 16
-                                                    ),
+                                                        color: AppColors
+                                                            .acccentFontColor,
+                                                        fontSize: 16),
                                                   ),
                                                   onTap: () {
                                                     setState(() {
-                                                      _selectedEvent = eventModel.eventName;
-                                                      _scannedIdNums = HashSet();
+                                                      _selectedEvent =
+                                                          eventModel.eventName;
+                                                      _scannedIdNums =
+                                                          HashSet();
                                                     });
                                                     Navigator.pop(context);
                                                   },
                                                 ),
                                               );
-
-                                        }, separatorBuilder: (BuildContext context, int index) => const SizedBox(
-                                          height: 0, //sets the border to 0
-                                          child: DecoratedBox(decoration: BoxDecoration(
-                                            color: Color.fromARGB(255, 0, 42, 77),
-                                          )),
-                                          ));
+                                            },
+                                            separatorBuilder: (BuildContext
+                                                        context,
+                                                    int index) =>
+                                                const SizedBox(
+                                                  height: 0,
+                                                  //sets the border to 0
+                                                  child: DecoratedBox(
+                                                      decoration: BoxDecoration(
+                                                    color: Color.fromARGB(
+                                                        255, 0, 42, 77),
+                                                  )),
+                                                ));
                                       }
 
                                       return const Center(
@@ -195,7 +213,8 @@ class _ScannerPageState extends State<ScannerPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white, // Background color
-                            borderRadius: BorderRadius.circular(5), // Add rounded corners
+                            borderRadius:
+                                BorderRadius.circular(5), // Add rounded corners
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -205,10 +224,9 @@ class _ScannerPageState extends State<ScannerPage> {
                                   Text(
                                     _selectedEvent,
                                     style: const TextStyle(
-                                      fontSize: 20,
-                                      color: AppColors.darkFontColor,
-                                      fontWeight: FontWeight.w600
-                                    ),
+                                        fontSize: 20,
+                                        color: AppColors.darkFontColor,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                   const Spacer(),
                                   const Icon(
@@ -234,63 +252,38 @@ class _ScannerPageState extends State<ScannerPage> {
             });
             if (_selectedEvent == "Select an event") {
               Fluttertoast.showToast(
-                  msg: "Please select an event",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.CENTER,
-                  timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.red,
-                  textColor: Colors.white,
-                  fontSize: 16.0);
+                msg: "Please select an event",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
               setState(() {
                 _scanned = false;
               });
               return;
             }
             String output = barcodes.barcodes.first.displayValue!;
+
             output = output.substring(1, output.length); // removes the 's' from the scanned barcode
 
-            if (_scannedIdNums.contains(output)){
+            if (!RegExp(r'^\d{6}$').hasMatch(output) || !output.startsWith('1') || RegExp(r'[A-Za-z]').hasMatch(output)) {
+              return;
+            }
+
+            if (_scannedIdNums.contains(output)) {
               setState(() {
                 _scanned = false;
               });
-                  
+
               return;
             } else {
               _scannedIdNums.add(output);
             }
 
-            QuerySnapshot student = await _studentsDb
-                .where('is_deleted', isEqualTo: false)
-                .where('student_id', isEqualTo: output)
-                .get();
-            QuerySnapshot event = await _eventsDB
-                .where('is_deleted', isEqualTo: false)
-                .where('event_name', isEqualTo: _selectedEvent)
-                .get();
-
-            if (student.docs.isNotEmpty && event.docs.isNotEmpty) {
-              QueryDocumentSnapshot studentQueryDoc = student.docs.first;
-              QueryDocumentSnapshot eventQueryDoc = event.docs.first;
-              Student studentModel = Student.fromMap(
-                  studentQueryDoc.data() as Map<String, dynamic>);
-
-              String firstName = studentModel.firstName;
-              DocumentReference studentDocRef = studentQueryDoc.reference;
-              DocumentReference eventDocRef = eventQueryDoc.reference;
-
-              await AttendanceService.makePresent(studentDocRef, eventDocRef);
-
-              Fluttertoast.showToast(
-                msg: firstName,
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.CENTER,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.blue,
-                textColor: Colors.white,
-                fontSize: 16.0
-              );
-
-            }
+            await fetchStudentAndEvent(output, _selectedEvent);
 
             setState(() {
               _output = output;
@@ -300,13 +293,125 @@ class _ScannerPageState extends State<ScannerPage> {
           },
         );
       })),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          controller.toggleTorch();
-        },
-        child: const Icon(Icons.lightbulb_outlined),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () async {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text(
+                    'Manually Add Student',
+                  ),
+                  content: SizedBox(
+                    height: 150,
+                    child: GenericFormFields(
+                      fields: [
+                        FormFieldData(
+                            key: 'studentId',
+                            label: "Student ID",
+                            isChoiceField: false,
+                            isDateField: false,
+                            isTimeField: false,
+                            isNumericOnly: true),
+                      ],
+                      onSubmit: (Map<String, String> formData) async {
+                        try {
+                          if (_selectedEvent == "Select an event") {
+                            Fluttertoast.showToast(
+                                msg: "Please select an event",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.CENTER,
+                                timeInSecForIosWeb: 1,
+                                backgroundColor: Colors.red,
+                                textColor: Colors.white,
+                                fontSize: 16.0);
+                            setState(() {
+                              _scanned = false;
+                            });
+                            return;
+                          }
+
+                          final studentID = formData['studentId'];
+                          logger.i("Manual Student ID: $studentID");
+                          await fetchStudentAndEvent(
+                              studentID!, _selectedEvent);
+
+                          setState(() {
+                            _output = studentID;
+                            _scannedIdNums = _scannedIdNums;
+                            _scanned = false;
+                          });
+                        } catch (e) {
+                          Fluttertoast.showToast(
+                            msg:
+                                "Some error occurred when trying manually add student",
+                            toastLength: Toast.LENGTH_LONG,
+                            gravity: ToastGravity.CENTER,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.blue,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                          logger.e("Error Manually Adding Student: $e");
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
+            child: const Icon(Icons.person_add_alt),
+          ),
+          const SizedBox(
+            width: 10,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              controller.toggleTorch();
+            },
+            child: const Icon(Icons.lightbulb_outlined),
+          ),
+        ],
       ),
       bottomNavigationBar: const DefaultBottomNavbar(index: 0),
     );
+  }
+
+  Future<void> fetchStudentAndEvent(
+      String studentID, String selectedEvent) async {
+    QuerySnapshot student = await _studentsDb
+        .where('is_deleted', isEqualTo: false)
+        .where('student_id', isEqualTo: studentID)
+        .get();
+
+    QuerySnapshot event = await _eventsDB
+        .where('is_deleted', isEqualTo: false)
+        .where('event_name', isEqualTo: selectedEvent)
+        .get();
+
+    if (student.docs.isNotEmpty && event.docs.isNotEmpty) {
+      QueryDocumentSnapshot studentQueryDoc = student.docs.first;
+      QueryDocumentSnapshot eventQueryDoc = event.docs.first;
+      Student studentModel =
+          Student.fromMap(studentQueryDoc.data() as Map<String, dynamic>);
+
+      String firstName = studentModel.firstName;
+      DocumentReference studentDocRef = studentQueryDoc.reference;
+      DocumentReference eventDocRef = eventQueryDoc.reference;
+
+      await AttendanceService.makePresent(studentDocRef, eventDocRef);
+
+      Fluttertoast.showToast(
+        msg: firstName,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 }

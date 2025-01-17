@@ -8,8 +8,6 @@ class UserManagement {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final logger = LogService();
 
-  // TODO: Refactor this to accept year level as well as on the "Set Role" button function
-  // TODO: You know what, just refactor this to accept the AppUser Model to make it clean
   /*Future<void> addPendingUser(String email, UserRole role) async {
     try {
       final adminDoc = await _firestore
@@ -90,7 +88,7 @@ class UserManagement {
               final data = doc.data();
               // data['role'] = 'admin';
               data['source'] = 'admin';
-              logger.i("$data");
+              // logger.i("$data");
               return data;
             }).toList());
 
