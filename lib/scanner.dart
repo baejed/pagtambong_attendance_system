@@ -104,8 +104,9 @@ class _ScannerPageState extends State<ScannerPage> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            // clears the id number label when switching events
+                            // clears the id number label and the scanned id's when switching events
                             _output = "";
+                            // _scannedIdNums = HashSet();
                           });
 
                           showModalBottomSheet<void>(
@@ -176,11 +177,12 @@ class _ScannerPageState extends State<ScannerPage> {
                                                         fontSize: 16),
                                                   ),
                                                   onTap: () {
+                                                    // clears the hashmap, this enables the past scanned id's to be scanned again
+                                                    _scannedIdNums.clear();
                                                     setState(() {
                                                       _selectedEvent =
                                                           eventModel.eventName;
-                                                      _scannedIdNums =
-                                                          HashSet();
+                                                      _scannedIdNums = _scannedIdNums;
                                                     });
                                                     Navigator.pop(context);
                                                   },
@@ -269,6 +271,8 @@ class _ScannerPageState extends State<ScannerPage> {
 
             output = output.substring(1, output.length); // removes the 's' from the scanned barcode
 
+            // ends the function when the id number does not have exactly 6 digits, starts with 1, and contains letters
+            // this speeds up the scanning since it rejects the invalid id numbers
             if (!RegExp(r'^\d{6}$').hasMatch(output) || !output.startsWith('1') || RegExp(r'[A-Za-z]').hasMatch(output)) {
               return;
             }
@@ -411,6 +415,16 @@ class _ScannerPageState extends State<ScannerPage> {
         backgroundColor: Colors.blue,
         textColor: Colors.white,
         fontSize: 16.0,
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: "${studentID} is not found",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0
       );
     }
   }
