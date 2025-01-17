@@ -148,7 +148,7 @@ class Login extends StatelessWidget {
           if (!context.mounted) return;
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ManageUsersScreen()),
+            MaterialPageRoute(builder: (context) => const ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject()),
           );
         }
       },
@@ -196,7 +196,7 @@ class Login extends StatelessWidget {
       onPressed: () async {
         final user = await AuthService().signInWithGoogle();
         logger.i("User: $user");
-        if (user != null || user != UserRole.user) {
+        if (user != null && user != UserRole.user) {
           if (!context.mounted) return;
           // await Session.init();
           Navigator.push(
