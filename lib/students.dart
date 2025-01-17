@@ -221,6 +221,7 @@ class StudentPageScreenState extends State<
                       page: _currentPage,
                       pageSize: _pageSize),
               builder: (context, snapshot) {
+                logger.i("SnapShot Type: ${snapshot.runtimeType}");
                 if (snapshot.hasError) {
                   return Center(
                     child: Text("Error: ${snapshot.error}"),

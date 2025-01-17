@@ -13,8 +13,9 @@ import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/CacheService.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
 
+final logger = LogService();
+
 class AuthService {
-  final logger = LogService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -22,8 +23,6 @@ class AuthService {
   User? _currUser;
 
   // PAAAAAAAAAAAAAAAGIIIIIIIIIIIIIIIINAAAAAAAAAAAAAAAAATIIIIIIIIIIIOOOOOOOON \\
-  static final CollectionReference _usersDb =
-      FirebaseFirestore.instance.collection('admin');
 
   static const int _batchSize = 100;
   static final _cache = UserCache();
@@ -41,7 +40,7 @@ class AuthService {
         // Emit Shit
         _emitPaginatedResults(cachedData, page, pageSize, searchQuery);
       }
-      var freshData = await getAllUsersNotStream();
+      var freshData = await AuthService().getAllUsersNotStream();
       await _cache.saveUsers(freshData);
       _emitPaginatedResults(freshData, page, pageSize, searchQuery);
     } catch (e) {
@@ -54,6 +53,7 @@ class AuthService {
     int pageSize = 20,
     String searchQuery = '',
   }) {
+    // _cache.clearCache();
     _loadUsers(page, pageSize, searchQuery);
     return _usersController.stream;
   }
@@ -147,17 +147,56 @@ class AuthService {
     }
   }
 
-  static Future<List<AppUser>> getAllUsersNotStream() async {
+  Future<List<AppUser>> getAllUsersNotStream() async {
     await Future.delayed(const Duration(seconds: 1));
 
     try {
-      final snapshot = await _usersDb.get();
-      final users = snapshot.docs.map((doc) {
-        return AppUser.fromMap(doc.data() as Map<String, dynamic>);
+      final admins = await _firestore.collection('admin').get();
+      final staffs = await _firestore.collection('staff').get();
+      // await AuthService().logSampleData();
+
+      final adminUsers = admins.docs.map((doc) {
+        final data = doc.data();
+        data['source'] = 'admin';
+        // logger.i("Admin data: $data");
+        return AppUser.fromMap(data);
       }).toList();
+
+      final staffUsers = staffs.docs.map((doc) {
+        final data = doc.data();
+        data['source'] = 'staff';
+        // logger.i("Staff data: $data");
+        return AppUser.fromMap(data);
+      }).toList();
+
+      // logger.i("Admins Shit: ${adminUsers.first}");
+      final users = [...adminUsers, ...staffUsers];
       return users;
     } catch (e) {
+      logger.e("Error fetching users: $e");
       return [];
+    }
+  }
+
+  Future<void> logSampleData() async {
+    try {
+      final QuerySnapshot admins =
+          await _firestore.collection('admin').limit(5).get();
+      final QuerySnapshot staffs = await _firestore.collection('staff').limit(5).get();
+
+      final adminUsers = admins.docs
+          .map((doc) => AppUser.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+      final staffUsers = staffs.docs
+          .map((doc) => AppUser.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+
+      logger.i(
+          "Sample Admins: ${adminUsers.map((user) => user.toJson()).toList()}");
+      logger.i(
+          "Sample Staffs: ${staffUsers.map((user) => user.toJson()).toList()}");
+    } catch (e) {
+      logger.e("Error logging sample data: $e");
     }
   }
 
@@ -289,6 +328,7 @@ class AuthService {
   }) async {
     await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
+    await Session.resetLoggedRole();
     await Future.delayed(const Duration(seconds: 1));
     if (context != null) {
       Navigator.pushReplacement(

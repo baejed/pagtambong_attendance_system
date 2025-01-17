@@ -78,7 +78,7 @@ class UserCache {
         .toList();
   }
 
-  Future<void> clearCacge() async {
+  Future<void> clearCache() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_cacheKey);
     await prefs.remove("${_cacheKey}_timestamp");

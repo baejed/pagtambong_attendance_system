@@ -334,7 +334,7 @@ class _ScannerPageState extends State<ScannerPage> {
                           }
 
                           final studentID = formData['studentId'];
-
+                          logger.i("Manual Student ID: $studentID");
                           await fetchStudentAndEvent(
                               studentID!, _selectedEvent);
 

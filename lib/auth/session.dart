@@ -25,4 +25,8 @@ class Session {
       loggedRole = await AuthService().getUserRole(user!.uid);
     }
   }
+
+  static Future<void> resetLoggedRole() async {
+    loggedRole = null;
+  }
 }

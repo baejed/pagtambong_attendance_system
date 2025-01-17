@@ -88,7 +88,7 @@ class UserManagement {
               final data = doc.data();
               // data['role'] = 'admin';
               data['source'] = 'admin';
-              logger.i("$data");
+              // logger.i("$data");
               return data;
             }).toList());
 
