@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
 import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/model/PaginatedResult.dart';
@@ -271,7 +272,7 @@ class AuthService {
       await Future.delayed(const Duration(seconds: 1));
 
       _currUser = userCredential.user;
-
+      await Session.init();
       // Check user role in Firestore
       final pendingUserDoc = await _firestore
           .collection("pending_users")
@@ -331,10 +332,14 @@ class AuthService {
     await Session.resetLoggedRole();
     await Future.delayed(const Duration(seconds: 1));
     if (context != null) {
-      Navigator.pushReplacement(
+      context.pushReplacementTransition(
+        type: PageTransitionType.rightToLeft,
+        child: Login(),
+      );
+      /*Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (BuildContext context) => Login()),
-      );
+      );*/
     }
   }
 

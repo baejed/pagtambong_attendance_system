@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:pagtambong_attendance_system/model/PaginatedResult.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
@@ -228,7 +229,6 @@ class ManageUsersScreen extends State<
                       page: _currentPage,
                       pageSize: _pageSize),
               builder: (context, snapshot) {
-                // TODO: There is an error parsing the enum UserRole, please fix ASAP
                 if (snapshot.hasError) {
                   // logger.i("SnapShot Type: ${snapshot.runtimeType}");
                   logger.e("Error: $snapshot");
@@ -306,8 +306,59 @@ class ManageUsersScreen extends State<
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
-            // TODO: Add Page for the detailed shit
-            Navigator.push(
+            context.pushTransition(
+                type: PageTransitionType.fade,
+                child: CustomUsersForm(
+                  onSubmit: (Map<String, String> formData) {
+                    try {
+                      AppUser userModel = AppUser(
+                        firstName: formData['firstName']!,
+                        lastName: formData['lastName']!,
+                        email: formData['email']!,
+                        uid: formData['uid'],
+                        role: formData['role']! == 'admin'
+                            ? UserRole.admin
+                            : UserRole.staff,
+                        yearLevel: {
+                          '1': '1st Year',
+                          '2': '2nd Year',
+                          '3': '3rd Year',
+                          '4': '4th Year'
+                        }[formData['yearLevel']] ??
+                            'Unknown',
+                        source: formData['role']!,
+                      );
+                      if (AuthService().isEmailAuthorized(userModel.email)) {
+                        _userManagement.addPendingUser(userModel).then((_) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("User Role added successfully!")),
+                          );
+                          // TODO: Need to implement catching an error for the GenericFormFields
+                          // so that when the email is invalid the form clears the text
+                          // we only check for um email in the users page
+                        }).catchError((error) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $error')),
+                          );
+                          _emailController.clear();
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('We only accept umindanao Email')),
+                        );
+                        _emailController.clear();
+                      }
+                    } catch (e) {
+                      logger.e("Error: $e");
+                    }
+                  },
+                  clearForm: () {
+                    _emailController.clear();
+                  },
+                ));
+            /*Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => CustomUsersForm(
@@ -361,7 +412,7 @@ class ManageUsersScreen extends State<
                   },
                 ),
               ),
-            );
+            );*/
           }),
     );
   }

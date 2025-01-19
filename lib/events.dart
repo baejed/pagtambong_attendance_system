@@ -2,20 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/data/college_programs.dart';
 import 'package:pagtambong_attendance_system/generic_component.dart';
 import 'package:pagtambong_attendance_system/model/AttendanceItem.dart';
 import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/model/Student.dart';
+import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/resources/CheckgaColors.dart';
 import 'package:pagtambong_attendance_system/service/EventService.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
 import 'package:pagtambong_attendance_system/widgets/event_form.dart';
 
-
 // TODO: add feedback when adding an event, properly dispose the controllers
-
 // this is the main page of the page
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -66,16 +67,28 @@ class _EventsPageState extends State<EventsPage> {
                     title: Text(
                       eventModel.eventName,
                       style: const TextStyle(
-                        color: AppColors.darkFontColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16
-                      ),
+                          color: AppColors.darkFontColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16),
                     ),
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => EventParticipantPage(eventDoc: eventDocRef, eventName: eventModel.eventName,)));
+                      context.pushTransition(
+                          type: PageTransitionType.fade,
+                          child: EventParticipantPage(
+                            eventDoc: eventDocRef,
+                            eventName: eventModel.eventName,
+                          ));
+                      /*Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EventParticipantPage(
+                                    eventDoc: eventDocRef,
+                                    eventName: eventModel.eventName,
+                                  )));*/
                     },
                     onLongPress: () {
-                      EventService.toggleOpenEvent(eventModel.eventName);
+                      if (Session.loggedRole == UserRole.admin)
+                        EventService.toggleOpenEvent(eventModel.eventName);
                     },
                     subtitle: Row(
                       children: [
@@ -100,34 +113,46 @@ class _EventsPageState extends State<EventsPage> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => EventForm(
-                                          editMode: true,
-                                          docRef: eventDocRef,
-                                          event: eventModel)));
-                            },
-                            icon: const Icon(
-                              Icons.edit,
-                              color: AppColors.acccentFontColor,
-                            )),
-                        IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          EventParticipantManager(
-                                              event: eventModel,
-                                              eventDocRef: eventDocRef)));
-                            },
-                            icon: const Icon(
-                              Icons.group_add,
-                              color: AppColors.acccentFontColor
-                            )),
+                        if (Session.loggedRole == UserRole.admin) ...[
+                          IconButton(
+                              onPressed: () {
+                                context.pushTransition(
+                                  type: PageTransitionType.fade,
+                                  child: EventForm(
+                                      editMode: true,
+                                      docRef: eventDocRef,
+                                      event: eventModel)
+                                );
+                                /*Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => EventForm(
+                                            editMode: true,
+                                            docRef: eventDocRef,
+                                            event: eventModel)));*/
+                              },
+                              icon: const Icon(
+                                Icons.edit,
+                                color: AppColors.acccentFontColor,
+                              )),
+                          IconButton(
+                              onPressed: () {
+                                context.pushTransition(
+                                    type: PageTransitionType.fade,
+                                    child: EventParticipantManager(
+                                        event: eventModel,
+                                        eventDocRef: eventDocRef));
+                                /*Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            EventParticipantManager(
+                                                event: eventModel,
+                                                eventDocRef: eventDocRef)));*/
+                              },
+                              icon: const Icon(Icons.group_add,
+                                  color: AppColors.acccentFontColor)),
+                        ]
                       ],
                     ),
                   ));
@@ -140,54 +165,92 @@ class _EventsPageState extends State<EventsPage> {
         },
       )),
       bottomNavigationBar: const DefaultBottomNavbar(index: 1),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => CustomEventForm(
-                        onSubmit: (Map<String, String> formData) {
-                          try {
-                            final DateTime date =
-                                DateTime.parse(formData['dates']!);
-                            logger.i("Date Type: ${date.runtimeType}");
-                            final TimeOfDay time =
-                                parseTimeString(formData['times']!);
-                            Event eventModel = Event(
-                              eventName: formData['eventName']!,
-                              venue: formData['venue']!,
-                              organizer: formData['organizer']!,
-                              date: setTime(date, time),
-                              isOpen: false,
-                            );
-                            EventService.addEvent(eventModel);
+      floatingActionButton: Session.loggedRole == UserRole.admin
+          ? FloatingActionButton(
+              onPressed: () {
+                context.pushTransition(
+                    type: PageTransitionType.fade,
+                    child: CustomEventForm(
+                      onSubmit: (Map<String, String> formData) {
+                        try {
+                          final DateTime date =
+                          DateTime.parse(formData['dates']!);
+                          logger.i("Date Type: ${date.runtimeType}");
+                          final TimeOfDay time =
+                          parseTimeString(formData['times']!);
+                          Event eventModel = Event(
+                            eventName: formData['eventName']!,
+                            venue: formData['venue']!,
+                            organizer: formData['organizer']!,
+                            date: setTime(date, time),
+                            isOpen: false,
+                          );
+                          EventService.addEvent(eventModel);
 
-                            Fluttertoast.showToast(
-                              msg: "Event successfully added",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.CENTER,
-                              timeInSecForIosWeb: 1,
-                              backgroundColor: Colors.blue,
-                              textColor: Colors.white,
-                              fontSize: 16.0,
-                            );
+                          Fluttertoast.showToast(
+                            msg: "Event successfully added",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.blue,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
 
-                            Navigator.pop(context);
-                          } catch (e) {
-                            logger.e("$e");
-                          }
-                          // logger.i("Date: ${formData['date']}");
-                          // logger.i("Time: ${formData['time']}");
-                        },
-                      )));
-          // Navigator.push(context, MaterialPageRoute(builder: (context) => const EventForm()));
-        },
-        child: const Icon(Icons.add),
-      ),
+                          Navigator.pop(context);
+                        } catch (e) {
+                          logger.e("$e");
+                        }
+                        // logger.i("Date: ${formData['date']}");
+                        // logger.i("Time: ${formData['time']}");
+                      },
+                    ));
+                /*Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CustomEventForm(
+                              onSubmit: (Map<String, String> formData) {
+                                try {
+                                  final DateTime date =
+                                      DateTime.parse(formData['dates']!);
+                                  logger.i("Date Type: ${date.runtimeType}");
+                                  final TimeOfDay time =
+                                      parseTimeString(formData['times']!);
+                                  Event eventModel = Event(
+                                    eventName: formData['eventName']!,
+                                    venue: formData['venue']!,
+                                    organizer: formData['organizer']!,
+                                    date: setTime(date, time),
+                                    isOpen: false,
+                                  );
+                                  EventService.addEvent(eventModel);
+
+                                  Fluttertoast.showToast(
+                                    msg: "Event successfully added",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: Colors.blue,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
+
+                                  Navigator.pop(context);
+                                } catch (e) {
+                                  logger.e("$e");
+                                }
+                                // logger.i("Date: ${formData['date']}");
+                                // logger.i("Time: ${formData['time']}");
+                              },
+                            )));*/
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => const EventForm()));
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }
-
 
 class EventForm extends StatefulWidget {
   const EventForm({super.key, this.editMode = false, this.docRef, this.event});
@@ -548,8 +611,11 @@ class _EventParticipantManager extends State<EventParticipantManager> {
 }
 
 void showAddEventModal(BuildContext context) {
-  Navigator.push(
-      context, MaterialPageRoute(builder: (context) => const EventForm()));
+  context.pushTransition(
+      type: PageTransitionType.fade,
+      child: const EventForm());
+  /*Navigator.push(
+      context, MaterialPageRoute(builder: (context) => const EventForm()));*/
 }
 
 DateTime setTime(DateTime dateTime, TimeOfDay time) {
@@ -626,108 +692,133 @@ class _AddParticipantWidgetState extends State<AddParticipantDialog> {
 }
 
 class EventParticipantPage extends StatefulWidget {
-
-  const EventParticipantPage({super.key, required this.eventDoc, required this.eventName});
+  const EventParticipantPage(
+      {super.key, required this.eventDoc, required this.eventName});
 
   final DocumentReference eventDoc;
   final String eventName;
-  
+
   @override
   State<StatefulWidget> createState() => _EventParticipantPageState();
-  
 }
 
 class _EventParticipantPageState extends State<EventParticipantPage> {
-
-  final CollectionReference attendanceItemDb = FirebaseFirestore.instance.collection('attendance-item');
+  final CollectionReference attendanceItemDb =
+      FirebaseFirestore.instance.collection('attendance-item');
 
   @override
   Widget build(BuildContext context) {
-
     final Stream<QuerySnapshot> eventParticipantsStream = attendanceItemDb
-      .where('event', isEqualTo: widget.eventDoc)
-      .orderBy('student_id', descending: false)
-      .snapshots();
+        .where('event', isEqualTo: widget.eventDoc)
+        .orderBy('student_id', descending: false)
+        .snapshots();
 
     return Scaffold(
       appBar: const DefaultAppBar(),
       body: Center(
         child: Column(
           children: [
-            Text(widget.eventName),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(widget.eventName),
+                StreamBuilder(
+                  stream: attendanceItemDb
+                      .where('event', isEqualTo: widget.eventDoc)
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasData) {
+                      int totalStudents = snapshot.data!.docs.length;
+                      int presentStudents = snapshot.data!.docs
+                          .where((doc) => doc['is_present'] == true)
+                          .length;
+                      return Text(
+                        ' ($presentStudents/$totalStudents)',
+                        style: const TextStyle(fontSize: 16),
+                      );
+                    }
+                    return const Text(' (Loading...)');
+                  },
+                )
+              ],
+            ),
             Expanded(
               child: StreamBuilder(
-                stream: eventParticipantsStream,
-                builder: (conext, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-                  if (streamSnapshot.hasData) {
-                    return ListView.builder(
-                      itemCount: streamSnapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        final docSnapshot = streamSnapshot.data!.docs[index];
-                        final Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
-                        final AttendanceItem attendanceItem = AttendanceItem.fromMap(data);
+                  stream: eventParticipantsStream,
+                  builder:
+                      (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+                    if (streamSnapshot.hasData) {
+                      return ListView.builder(
+                          itemCount: streamSnapshot.data!.docs.length,
+                          itemBuilder: (context, index) {
+                            final docSnapshot =
+                                streamSnapshot.data!.docs[index];
+                            final Map<String, dynamic> data =
+                                docSnapshot.data() as Map<String, dynamic>;
+                            final AttendanceItem attendanceItem =
+                                AttendanceItem.fromMap(data);
 
-                        return FutureBuilder(
-                          future: attendanceItem.student.get(), 
-                          builder: (context, futureSnapshot) {
-                            if (futureSnapshot.connectionState == ConnectionState.waiting) {
-                              // Show a loading indicator while fetching the student
-                              return const ListTile(
-                                title: Text("Loading student info..."),
-                              );
-                            }
-                    
-                            if (futureSnapshot.hasData && futureSnapshot.data != null) {
-                              final Map<String, dynamic> studentData = futureSnapshot.data!.data() as Map<String, dynamic>;
-                              final Student student = Student.fromMap(studentData);
-                    
-                              return ListTile(
-                                title: Text(student.firstName),
-                                subtitle: Text(student.studentId),
-                                trailing: (attendanceItem.isPresent) 
-                                  ? const Icon(
-                                    Icons.check,
-                                    color: Colors.green,
-                                  )
-                                  : null
-                                ,
-                              );
-                            }
-                    
-                            // Handle the case where no student data is found
-                            return const ListTile(
-                              title: Text("Student not found"),
-                            );
-                          }
-                        );
-                    
-                        // return Material(
-                        //   child: ListTile(
-                        //     title: Text(docSnapshot['is_present'].toString()),
-                        //   ),
-                        // );
-                    
-                      }
-                    );
-                  }
-                    
-                  if (streamSnapshot.connectionState == ConnectionState.waiting){
+                            return FutureBuilder(
+                                future: attendanceItem.student.get(),
+                                builder: (context, futureSnapshot) {
+                                  if (futureSnapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    // Show a loading indicator while fetching the student
+                                    return const ListTile(
+                                      title: Text("Loading student info..."),
+                                    );
+                                  }
+
+                                  if (futureSnapshot.hasData &&
+                                      futureSnapshot.data != null) {
+                                    final Map<String, dynamic> studentData =
+                                        futureSnapshot.data!.data()
+                                            as Map<String, dynamic>;
+                                    final Student student =
+                                        Student.fromMap(studentData);
+
+                                    return ListTile(
+                                      title: Text(student.firstName),
+                                      subtitle: Text(student.studentId),
+                                      trailing: (attendanceItem.isPresent)
+                                          ? const Icon(
+                                              Icons.check,
+                                              color: Colors.green,
+                                            )
+                                          : null,
+                                    );
+                                  }
+
+                                  // Handle the case where no student data is found
+                                  return const ListTile(
+                                    title: Text("Student not found"),
+                                  );
+                                });
+
+                            // return Material(
+                            //   child: ListTile(
+                            //     title: Text(docSnapshot['is_present'].toString()),
+                            //   ),
+                            // );
+                          });
+                    }
+
+                    if (streamSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
                     return const Center(
-                      child: CircularProgressIndicator(),
+                      child: Text("No participants found"),
                     );
-                  }
-                    
-                  return const Center(
-                    child: Text("No participants found"),
-                  );
-                }),
+                  }),
             ),
           ],
         ),
       ),
       bottomNavigationBar: const DefaultBottomNavbar(index: 1),
     );
-
   }
-
 }

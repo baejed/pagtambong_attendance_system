@@ -15,7 +15,7 @@ class EventService {
   static final CollectionReference _eventDb =
       FirebaseFirestore.instance.collection('events');
   static final CollectionReference _attendanceItemDb =
-  FirebaseFirestore.instance.collection('attendance-item');
+      FirebaseFirestore.instance.collection('attendance-item');
 
   static final CollectionReference _studentsDb =
       FirebaseFirestore.instance.collection('student-info');
@@ -101,13 +101,18 @@ class EventService {
         : <Student>[];
 
     final result = PaginatedResult<Student>(
-        items: paginatedItems,
-        total: students.length,
-        page: page,
-        pageSize: pageSize,
-        hasMore: endIndex < students.length);
+      items: paginatedItems,
+      total: students.length,
+      page: page,
+      pageSize: pageSize,
+      hasMore: endIndex < students.length,
+    );
 
-    _studentsController.add(result);
+    if (searchQuery.isEmpty) {
+      _studentsController.add(result);
+    } else {
+      _searchController.add(result);
+    }
   }
 
   static List<Student> _filterStudents(List<Student> students, String query) {
@@ -271,8 +276,12 @@ class EventService {
       return;
     }
 
-    AttendanceItem attendanceItem = AttendanceItem(event: eventDocRef, isPresent: false, student: studentDocRef!, studentId: idNumber);
-    
+    AttendanceItem attendanceItem = AttendanceItem(
+        event: eventDocRef,
+        isPresent: false,
+        student: studentDocRef!,
+        studentId: idNumber);
+
     await _attendanceItemDb.add(attendanceItem.toMap());
 
     Fluttertoast.showToast(
@@ -303,10 +312,14 @@ class EventService {
     if (attendanceItemExists) return;
 
     await studentDocRef.get().then((onValue) {
-        idNumber = onValue['student_id'];
+      idNumber = onValue['student_id'];
     });
 
-    AttendanceItem attendanceItem = AttendanceItem(event: eventDocRef, isPresent: false, student: studentDocRef, studentId: idNumber!);
+    AttendanceItem attendanceItem = AttendanceItem(
+        event: eventDocRef,
+        isPresent: false,
+        student: studentDocRef,
+        studentId: idNumber!);
     await _attendanceItemDb.add(attendanceItem.toMap());
   }
 

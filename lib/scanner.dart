@@ -104,9 +104,8 @@ class _ScannerPageState extends State<ScannerPage> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            // clears the id number label and the scanned id's when switching events
+                            // clears the id number label when switching events
                             _output = "";
-                            // _scannedIdNums = HashSet();
                           });
 
                           showModalBottomSheet<void>(
@@ -177,12 +176,11 @@ class _ScannerPageState extends State<ScannerPage> {
                                                         fontSize: 16),
                                                   ),
                                                   onTap: () {
-                                                    // clears the hashmap, this enables the past scanned id's to be scanned again
-                                                    _scannedIdNums.clear();
                                                     setState(() {
                                                       _selectedEvent =
                                                           eventModel.eventName;
-                                                      _scannedIdNums = _scannedIdNums;
+                                                      _scannedIdNums =
+                                                          HashSet();
                                                     });
                                                     Navigator.pop(context);
                                                   },
@@ -415,16 +413,6 @@ class _ScannerPageState extends State<ScannerPage> {
         backgroundColor: Colors.blue,
         textColor: Colors.white,
         fontSize: 16.0,
-      );
-    } else {
-      Fluttertoast.showToast(
-        msg: "${studentID} is not found",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0
       );
     }
   }
