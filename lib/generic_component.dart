@@ -218,7 +218,7 @@ class DefaultDrawer extends StatelessWidget {
               ),
             ),
           ),
-          ListTile(
+          /*ListTile(
             leading:  const Icon(Icons.account_circle),
             title: const Text("Profile"),
             onTap: () {
@@ -232,8 +232,8 @@ class DefaultDrawer extends StatelessWidget {
                 fontSize: 16.0,
               );
             },
-          ),
-          ListTile(
+          ),*/
+          /*ListTile(
             leading:  const Icon(Icons.settings),
             title: const Text("Settings"),
             onTap: () {
@@ -247,7 +247,7 @@ class DefaultDrawer extends StatelessWidget {
                 fontSize: 16.0,
               );
             },
-          ),
+          ),*/
 
           ListTile(
             leading:  const Icon(Icons.logout),
@@ -255,7 +255,7 @@ class DefaultDrawer extends StatelessWidget {
             onTap: () {
               // logger.i("User Role: ${Session.loggedRole}");
               AuthService().signOut(context: context);
-              Fluttertoast.showToast(
+              /*Fluttertoast.showToast(
                 msg: "Logout The Shit out of You",
                 toastLength: Toast.LENGTH_LONG,
                 gravity: ToastGravity.CENTER,
@@ -263,7 +263,7 @@ class DefaultDrawer extends StatelessWidget {
                 backgroundColor: Colors.blue,
                 textColor: Colors.white,
                 fontSize: 16.0,
-              );
+              );*/
             },
           ),
 
