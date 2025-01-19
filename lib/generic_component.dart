@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:pagtambong_attendance_system/auth/session.dart';
 import 'package:pagtambong_attendance_system/events.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
@@ -62,37 +63,57 @@ class DefaultBottomNavbar extends StatelessWidget {
 
     switch (index) {
       case 0:
-        Navigator.pushAndRemoveUntil(
+        context.pushAndRemoveUntilTransition(
+          type: PageTransitionType.fade,
+          child: const ScannerPage(),
+          predicate: (route) => false,
+        );
+        /*Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const ScannerPage()),
-            (route) => false);
+            (route) => false);*/
         // Navigator.pushReplacement(context,
         //     MaterialPageRoute(builder: (context) => const ScannerPage()));
         break;
       case 1:
-        Navigator.pushAndRemoveUntil(
+        context.pushAndRemoveUntilTransition(
+          type: PageTransitionType.fade,
+          child: const EventsPage(),
+          predicate: (route) => false,
+        );
+        /*Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const EventsPage()),
-            (route) => false);
+            (route) => false);*/
         // Navigator.pushReplacement(context,
         //     MaterialPageRoute(builder: (context) => const EventsPage()));
         break;
       case 2:
-        Navigator.pushAndRemoveUntil(
+        context.pushAndRemoveUntilTransition(
+          type: PageTransitionType.fade,
+          child: const StudentPageScreenSomethingThatIDontEvenKnowWhatThisIsAnymorePleaseHelpMe(),
+          predicate: (route) => false,
+        );
+        /*Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
                 builder: (context) =>
                     const StudentPageScreenSomethingThatIDontEvenKnowWhatThisIsAnymorePleaseHelpMe()),
-            (route) => false);
+            (route) => false);*/
         // Navigator.pushReplacement(context,
         //     MaterialPageRoute(builder: (context) => const PersonelPage()));
         break;
       case 3:
-        Navigator.pushAndRemoveUntil(
+        context.pushAndRemoveUntilTransition(
+          type: PageTransitionType.fade,
+          child: const ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject(),
+          predicate: (route) => false,
+        );
+        /*Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject()),
           (route) => false,
-        );
+        );*/
         break;
     }
   }

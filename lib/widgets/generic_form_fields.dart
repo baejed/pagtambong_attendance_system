@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
 
 class GenericFormFields extends StatefulWidget {
@@ -186,6 +187,10 @@ class _GenericFormFieldsState extends State<GenericFormFields> {
                         child: TextField(
                           controller: _controllers[field.key],
                           keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(6),
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -239,6 +244,7 @@ class _GenericFormFieldsState extends State<GenericFormFields> {
                 }
                 // logger.i("Form Data: $formData");
                 widget.onSubmit(formData);
+                clearForm();
               },
               child: const Text("Submit"),
             )

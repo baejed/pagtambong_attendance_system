@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:pagtambong_attendance_system/auth/login.dart';
 
 class SignUp extends StatelessWidget {
@@ -164,8 +165,11 @@ class SignUp extends StatelessWidget {
                   fontSize: 16),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Login()));
+                  context.pushTransition(
+                      type: PageTransitionType.fade,
+                      child: Login());
+                  /*Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Login()));*/
                 },
             ),
           ],

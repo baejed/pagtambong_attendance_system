@@ -25,6 +25,8 @@ class StudentPageScreenState extends State<
   final ScrollController _scrollController = ScrollController();
   final logger = LogService();
   Timer? _debounce;
+  final List<Student> _students = [];
+  final StreamController<PaginatedResult<Student>> _streamController = StreamController<PaginatedResult<Student>>();
 
   // For the Pagination
   int _currentPage = 1;
@@ -37,7 +39,7 @@ class StudentPageScreenState extends State<
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent * 0.8 &&
-          _isLoading &&
+          !_isLoading &&
           _hasMore) {
         // Load More Data
         _loadMoreData();
@@ -54,11 +56,28 @@ class StudentPageScreenState extends State<
     });
 
     // Load more shit
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      await Future.delayed(const Duration(milliseconds: 500));
+      final newResult = await EventService.getAllPaginatedStudents(
+        pageSize: _pageSize,
+        page: _currentPage,
+      ).first;
 
-    setState(() {
-      _isLoading = false;
-    });
+      if (newResult.items.isEmpty) {
+        _hasMore = false;
+      } else {
+        setState(() {
+          _students.addAll(newResult.items);
+          _hasMore = newResult.hasMore;
+        });
+      }
+    } catch (e) {
+      logger.e("Error Loading More Data: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   /*Future<void> _initializeData() async {
@@ -141,9 +160,7 @@ class StudentPageScreenState extends State<
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Students Page"),
-      ),
+      appBar: const DefaultAppBar(),
       drawer: const DefaultDrawer(),
       body: Column(
         children: [
@@ -215,13 +232,13 @@ class StudentPageScreenState extends State<
             child: StreamBuilder<PaginatedResult<Student>>(
               stream: _searchStudentController.text.isEmpty
                   ? EventService.getAllPaginatedStudents(
-                      page: _currentPage, pageSize: _pageSize)
+                      page: 1, pageSize: _pageSize)
                   : EventService.getSearchResults(
                       query: _searchStudentController.text,
-                      page: _currentPage,
+                      page: 1,
                       pageSize: _pageSize),
               builder: (context, snapshot) {
-                logger.i("SnapShot Type: ${snapshot.runtimeType}");
+                // logger.i("SnapShot Type: ${snapshot.runtimeType}");
                 if (snapshot.hasError) {
                   return Center(
                     child: Text("Error: ${snapshot.error}"),
@@ -234,13 +251,17 @@ class StudentPageScreenState extends State<
                 }
 
                 final result = snapshot.data!;
+                if (_currentPage == 1) {
+                  _students.clear();
+                  _students.addAll(result.items);
+                }
                 _hasMore = result.hasMore;
 
                 return ListView.builder(
                   controller: _scrollController,
-                  itemCount: result.items.length + (_hasMore ? 1 : 0),
+                  itemCount: _students.length + (_hasMore ? 1 : 0),
                   itemBuilder: (content, index) {
-                    if (index >= result.items.length) {
+                    if (index >= _students.length) {
                       return const Center(
                         child: Padding(
                           padding: EdgeInsets.all(8.0),
@@ -249,11 +270,11 @@ class StudentPageScreenState extends State<
                       );
                     }
 
-                    final student = result.items[index];
+                    final student = _students[index];
                     return ListTile(
-                      title: Text("${student.firstName} ${student.lastName}"),
+                      title: Text("${index+1}. ${student.firstName} ${student.lastName}"),
                       subtitle:
-                          Text("${student.studentId}, ${student.yearLevel}"),
+                          Text("\t\t\t\t\t${student.studentId}, ${student.yearLevel}"),
                     );
                   },
                 );

@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pagtambong_attendance_system/auth/session.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:pagtambong_attendance_system/auth/signup.dart';
 import 'package:pagtambong_attendance_system/model/UserRoles.dart';
 import 'package:pagtambong_attendance_system/service/AuthService.dart';
@@ -146,10 +146,15 @@ class Login extends StatelessWidget {
             context: context);
         if (user != null) {
           if (!context.mounted) return;
-          Navigator.push(
+          context.pushAndRemoveUntilTransition(
+            type: PageTransitionType.fade,
+            child: const ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject(),
+            predicate: (route) => false,
+          );
+          /*Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ManageUseringScreenPleaseHelpMeThisIsNotHealthyForMyMentalHealthIThinkIAmGoingInsaneWithThisProject()),
-          );
+          );*/
         }
       },
       child: const Text(
@@ -182,8 +187,11 @@ class Login extends StatelessWidget {
                   fontSize: 16),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SignUp()));
+                  context.pushTransition(
+                      type: PageTransitionType.fade,
+                      child: SignUp());
+                  /*Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => SignUp()));*/
                 }) // This is how you get a text to be fucking clickable
         ]),
         textAlign: TextAlign.center,
@@ -199,10 +207,15 @@ class Login extends StatelessWidget {
         if (user != null && user != UserRole.user) {
           if (!context.mounted) return;
           // await Session.init();
-          Navigator.push(
+          context.pushAndRemoveUntilTransition(
+            type: PageTransitionType.fade,
+            child: const ScannerPage(),
+            predicate: (route) => false,
+          );
+          /*Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ScannerPage()),
-          );
+          );*/
         }
       },
       child: const Row(

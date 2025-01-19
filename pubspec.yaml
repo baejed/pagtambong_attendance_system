@@ -50,6 +50,11 @@ dependencies:
   intl: ^0.17.0
   shared_preferences: ^2.3.5
   flutter_native_splash: ^2.4.4
+  internet_connection_checker_plus: ^1.0.1
+  test: ^1.25.8
+  connectivity_plus: ^6.1.2
+  get: ^4.6.6
+  page_transition: ^2.2.1
 
 
 dev_dependencies:
