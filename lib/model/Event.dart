@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Event {
@@ -20,7 +18,7 @@ class Event {
   Map<String, dynamic> toMap() {
     return {
       'event_name': eventName,
-      'date': date.toIso8601String(),
+      'date': date,
       'organizer': organizer,
       'venue': venue,
       'is_open': isOpen,
@@ -33,15 +31,11 @@ class Event {
   factory Event.fromMap(Map<String, dynamic> data) {
     try {
       return Event(
-        eventName: data['event_name'] ?? 'Unnamed Event',
-        date: data['date'] is Timestamp
-            ? (data['date'] as Timestamp).toDate()
-            : (data['date'] is String
-            ? DateTime.parse(data['date'])
-            : DateTime.now()),
-        organizer: data['organizer'] ?? 'Unknown Organizer',
-        venue: data['venue'] ?? 'Unknown Venue',
-        isOpen: data['is_open'] ?? false,
+        eventName: data['event_name'] ?? '',
+        date: data['date'] ?? '',
+        organizer: data['organizer'] ?? '',
+        venue: data['venue'] ?? '',
+        isOpen: data['is_open'] ?? '',
       );
     } catch (e) {
       print('Error parsing event: $e');

@@ -170,80 +170,11 @@ class _EventsPageState extends State<EventsPage> {
               onPressed: () {
                 context.pushTransition(
                     type: PageTransitionType.fade,
-                    child: CustomEventForm(
-                      onSubmit: (Map<String, String> formData) {
-                        try {
-                          final DateTime date =
-                          DateTime.parse(formData['dates']!);
-                          logger.i("Date Type: ${date.runtimeType}");
-                          final TimeOfDay time =
-                          parseTimeString(formData['times']!);
-                          Event eventModel = Event(
-                            eventName: formData['eventName']!,
-                            venue: formData['venue']!,
-                            organizer: formData['organizer']!,
-                            date: setTime(date, time),
-                            isOpen: false,
-                          );
-                          EventService.addEvent(eventModel);
+                    child: EventForm(
+                      editMode: false,
+                    ),
 
-                          Fluttertoast.showToast(
-                            msg: "Event successfully added",
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.CENTER,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Colors.blue,
-                            textColor: Colors.white,
-                            fontSize: 16.0,
-                          );
-
-                          Navigator.pop(context);
-                        } catch (e) {
-                          logger.e("$e");
-                        }
-                        // logger.i("Date: ${formData['date']}");
-                        // logger.i("Time: ${formData['time']}");
-                      },
-                    ));
-                /*Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CustomEventForm(
-                              onSubmit: (Map<String, String> formData) {
-                                try {
-                                  final DateTime date =
-                                      DateTime.parse(formData['dates']!);
-                                  logger.i("Date Type: ${date.runtimeType}");
-                                  final TimeOfDay time =
-                                      parseTimeString(formData['times']!);
-                                  Event eventModel = Event(
-                                    eventName: formData['eventName']!,
-                                    venue: formData['venue']!,
-                                    organizer: formData['organizer']!,
-                                    date: setTime(date, time),
-                                    isOpen: false,
-                                  );
-                                  EventService.addEvent(eventModel);
-
-                                  Fluttertoast.showToast(
-                                    msg: "Event successfully added",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor: Colors.blue,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0,
-                                  );
-
-                                  Navigator.pop(context);
-                                } catch (e) {
-                                  logger.e("$e");
-                                }
-                                // logger.i("Date: ${formData['date']}");
-                                // logger.i("Time: ${formData['time']}");
-                              },
-                            )));*/
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => const EventForm()));
+                );
               },
               child: const Icon(Icons.add),
             )
@@ -446,7 +377,7 @@ class _EventFormState extends State<EventForm> {
 
                       Fluttertoast.showToast(
                           msg:
-                              "Event successfuly ${edit ? "updated" : "added"}",
+                              "Event successfully ${edit ? "updated" : "added"}",
                           toastLength: Toast.LENGTH_SHORT,
                           gravity: ToastGravity.CENTER,
                           timeInSecForIosWeb: 1,
