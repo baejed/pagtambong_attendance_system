@@ -99,7 +99,6 @@ class EventCacheService {
 
   // Initialize the service with online/offline capability
   void initialize(bool? isOnline) {
-    logger.i("Initializing Event Cache... isOnline: $isOnline");
     if (isOnline == true) {
       _subscribeToFirestore();
     } else if (isOnline == false) {
@@ -203,25 +202,29 @@ class EventCacheService {
   // Get cached events
   Future<List<Event>> getCachedEvents() async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_eventsKey);
-    final timeStampString = prefs.getString("${_eventsKey}_timestamp");
+    final jsonString = prefs.getString("${_eventsKey}");
+    // final timeStampString = prefs.getString("${_eventsKey}");
 
-    if (jsonString == null || timeStampString == null) {
+    if (jsonString == null) {
       return [];
     }
 
-    final timeStamp = DateTime.parse(timeStampString);
-    if (DateTime.now().difference(timeStamp) > _cacheValidDuration) {
+    // final timeStamp = DateTime.parse(timeStampString);
+    /*if (DateTime.now().difference(timeStamp) > _cacheValidDuration) {
       return []; // Cache expired
-    }
-
+    }*/
+    logger.i("JSON STRING: $jsonString");
     final jsonData = jsonDecode(jsonString) as List;
-    return jsonData.map((item) {
+    final event = jsonData.map((item) {
       Map<String, dynamic> eventMap = item as Map<String, dynamic>;
       // Convert the ISO date string back to DateTime
-      eventMap['date'] = DateTime.parse(eventMap['date']);
+      // logger.i("Event Map Date: ${eventMap['date']}");
+      // eventMap['date'] = DateTime.parse(eventMap['date']);
       return Event.fromMap(eventMap);
     }).toList();
+    _eventController.add(event);
+    return event;
+
   }
 
   // Clean up resources

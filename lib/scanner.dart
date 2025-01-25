@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -13,7 +12,9 @@ import 'package:pagtambong_attendance_system/model/Event.dart';
 import 'package:pagtambong_attendance_system/model/Student.dart';
 import 'package:pagtambong_attendance_system/resources/CheckgaColors.dart';
 import 'package:pagtambong_attendance_system/service/AttendanceService.dart';
+import 'package:pagtambong_attendance_system/service/CacheEventService.dart';
 import 'package:pagtambong_attendance_system/service/CacheService.dart';
+import 'package:pagtambong_attendance_system/service/ConnectivityService.dart';
 import 'package:pagtambong_attendance_system/service/LogService.dart';
 import 'package:pagtambong_attendance_system/service/OfflineAttendanceService.dart';
 import 'package:pagtambong_attendance_system/widgets/generic_form_fields.dart';
@@ -46,7 +47,9 @@ class _ScannerPageState extends State<ScannerPage> {
   bool _scanned = false; // this variable does something now
 
   // For Internet Connectivity Check
+  final ConnectivityService _connectivityService = ConnectivityService();
   bool isConnectedToInternet = false;
+  bool _isEventCacheUpdated = false;
   late final AppLifecycleListener _lifecycleListener;
   StreamSubscription<InternetConnectionStatus>?
       _internetConnectionStreamSubscription;
@@ -55,78 +58,63 @@ class _ScannerPageState extends State<ScannerPage> {
   final OfflineAttendanceService _offlineAttendanceService =
       OfflineAttendanceService();
   final EventCacheService _eventCache = EventCacheService();
+  final CacheEventService _cacheEventService = CacheEventService();
 
   @override
   void initState() {
     super.initState();
 
-// Check initial connectivity status
-    Connectivity().checkConnectivity().then((result) {
-      setState(() {
-        isConnectedToInternet = result != ConnectivityResult.none;
-      });
-      _eventCache.initialize(isConnectedToInternet);
-    });
-
-    // Listen for connectivity changes
-    Connectivity()
-        .onConnectivityChanged
-        .listen((List<ConnectivityResult> results) async {
-      setState(() {
-        isConnectedToInternet =
-            results.isNotEmpty && results.first != ConnectivityResult.none;
-      });
-      await _offlineAttendanceService.syncPendingAttendance();
-      _eventCache.handleConnectivityChange(isConnectedToInternet);
-      if (!isConnectedToInternet) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No Internet Connection')),
-        );
-      }
-    });
-
-    /*// Check initial connectivity status
-    InternetConnectionCheckerPlus().hasConnection.then((connected) {
+    _connectivityService.checkConnectivity().then((connected) async {
       setState(() {
         isConnectedToInternet = connected;
       });
-      _eventCache.initialize(isConnectedToInternet);
+      if (connected) {
+        await _offlineAttendanceService.fetchAndCacheAllStudents(context);
+        // await _offlineAttendanceService.fetchAndCacheAllEvents(context);
+        await _cacheEventService.fetchAndCacheAllEvents();
+        // await _offlineAttendanceService.cacheAllEventReference();
+        // await CacheEventService().fetchAndCacheAllEvents();
+      }
+      // _eventCache.initialize(connected);
+      if (connected && !_isEventCacheUpdated) {
+        // await _offlineAttendanceService.cacheAllEventReference();
+        await _cacheEventService.fetchAndCacheAllEvents();
+        _isEventCacheUpdated = true;
+      } else if (!connected) {
+        _isEventCacheUpdated = false;
+      }
+
     });
+
     // Listen for connectivity changes
-    _internetConnectionStreamSubscription =
-        InternetConnectionCheckerPlus().onStatusChange.listen((event) {
-          switch (event) {
-            case InternetConnectionStatus.connected:
-              setState(() async {
-                isConnectedToInternet = true;
-                await _offlineAttendanceService.syncPendingAttendance();
-              });
-              _eventCache.handleConnectivityChange(true);
-              break;
-            case InternetConnectionStatus.disconnected:
-              setState(() {
-                isConnectedToInternet = false;
-              });
-              _eventCache.handleConnectivityChange(false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('No Internet Connection')),
-              );
-              break;
-          }
-        });
-    _eventCache.initialize(isConnectedToInternet);
-    _lifecycleListener = AppLifecycleListener(
-      onResume: _internetConnectionStreamSubscription?.resume,
-      onHide: _internetConnectionStreamSubscription?.pause,
-      onPause: _internetConnectionStreamSubscription?.pause,
-    );*/
+    _connectivityService.connectivityStream.listen((connected) async {
+      setState(() {
+        isConnectedToInternet = connected;
+      });
+
+      if (connected) {
+        await _offlineAttendanceService.syncPendingAttendance(context);
+        await _cacheEventService.fetchAndCacheAllEvents();
+        // _eventCache.handleConnectivityChange(true);
+      } else {
+        // _eventCache.handleConnectivityChange(false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Weak or no internet connection. Switching to offline mode.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
     _eventCache.dispose();
     _internetConnectionStreamSubscription?.cancel();
-    _lifecycleListener.dispose();
+    _connectivityService.dispose();
+    // _lifecycleListener.dispose();
     super.dispose();
   }
 
@@ -212,8 +200,92 @@ class _ScannerPageState extends State<ScannerPage> {
                                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                 child: SizedBox(
                                   height: 300,
-                                  child: StreamBuilder<List<Event>>(
-                                    stream: _eventCache.getEventStream(),
+                                  child: StreamBuilder(
+                                    stream: streamEventsDB,
+                                    builder: (context,
+                                        AsyncSnapshot<QuerySnapshot>
+                                        streamSnapshot) {
+                                      if (streamSnapshot.hasData) {
+                                        // Listview.separated is used for adding gaps
+                                        return ListView.separated(
+                                          // padding: const EdgeInsets.all(10),
+                                            itemCount: streamSnapshot
+                                                .data!.docs.length,
+                                            itemBuilder: (context, index) {
+                                              Event eventModel = Event(
+                                                  eventName:
+                                                  streamSnapshot.data!.docs[index]
+                                                  ['event_name'],
+                                                  date: (streamSnapshot.data!.docs[index]
+                                                  ['date'] as Timestamp)
+                                                      .toDate(),
+                                                  isOpen: streamSnapshot.data!
+                                                      .docs[index]['is_open'],
+                                                  organizer: streamSnapshot
+                                                      .data!
+                                                      .docs[index]['organizer'],
+                                                  venue: streamSnapshot.data!
+                                                      .docs[index]['venue']);
+                                              return Material(
+                                                color: Colors.white,
+                                                child: ListTile(
+                                                  title: Text(
+                                                    eventModel.eventName,
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                        FontWeight.w500,
+                                                        fontSize: 20,
+                                                        color: AppColors
+                                                            .darkFontColor),
+                                                  ),
+                                                  subtitle: Text(
+                                                    eventModel
+                                                        .getFormatedDateString(),
+                                                    style: const TextStyle(
+                                                        color: AppColors
+                                                            .subtitleFontColor),
+                                                  ),
+                                                  trailing: Text(
+                                                    eventModel
+                                                        .getFormatedTimeString(),
+                                                    style: const TextStyle(
+                                                        color: AppColors
+                                                            .acccentFontColor,
+                                                        fontSize: 16),
+                                                  ),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      _selectedEvent =
+                                                          eventModel.eventName;
+                                                      _scannedIdNums =
+                                                          HashSet();
+                                                    });
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                              );
+                                            },
+                                            separatorBuilder: (BuildContext
+                                            context,
+                                                int index) =>
+                                            const SizedBox(
+                                              height: 0,
+                                              //sets the border to 0
+                                              child: DecoratedBox(
+                                                  decoration: BoxDecoration(
+                                                    color: Color.fromARGB(
+                                                        255, 0, 42, 77),
+                                                  )),
+                                            ));
+                                      }
+
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    },
+                                  ),
+
+                                  /*StreamBuilder<List<Event>>(
+                                    stream: _cacheEventService.cacheEventChecker(),
                                     builder: (context,
                                         AsyncSnapshot<List<Event>> snapshot) {
                                       logger.i("Events: ${snapshot.data}");
@@ -261,91 +333,9 @@ class _ScannerPageState extends State<ScannerPage> {
                                       return const Center(
                                           child: CircularProgressIndicator());
                                     },
-                                  ),
-
-                                  /*StreamBuilder(
-                                    stream: streamEventsDB,
-                                    builder: (context,
-                                        AsyncSnapshot<QuerySnapshot>
-                                            streamSnapshot) {
-                                      if (streamSnapshot.hasData) {
-                                        // Listview.separated is used for adding gaps
-                                        return ListView.separated(
-                                            // padding: const EdgeInsets.all(10),
-                                            itemCount: streamSnapshot
-                                                .data!.docs.length,
-                                            itemBuilder: (context, index) {
-                                              Event eventModel = Event(
-                                                  eventName:
-                                                      streamSnapshot.data!.docs[index]
-                                                          ['event_name'],
-                                                  date: (streamSnapshot.data!.docs[index]
-                                                          ['date'] as Timestamp)
-                                                      .toDate(),
-                                                  isOpen: streamSnapshot.data!
-                                                      .docs[index]['is_open'],
-                                                  organizer: streamSnapshot
-                                                      .data!
-                                                      .docs[index]['organizer'],
-                                                  venue: streamSnapshot.data!
-                                                      .docs[index]['venue']);
-                                              return Material(
-                                                color: Colors.white,
-                                                child: ListTile(
-                                                  title: Text(
-                                                    eventModel.eventName,
-                                                    style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 20,
-                                                        color: AppColors
-                                                            .darkFontColor),
-                                                  ),
-                                                  subtitle: Text(
-                                                    eventModel
-                                                        .getFormatedDateString(),
-                                                    style: const TextStyle(
-                                                        color: AppColors
-                                                            .subtitleFontColor),
-                                                  ),
-                                                  trailing: Text(
-                                                    eventModel
-                                                        .getFormatedTimeString(),
-                                                    style: const TextStyle(
-                                                        color: AppColors
-                                                            .acccentFontColor,
-                                                        fontSize: 16),
-                                                  ),
-                                                  onTap: () {
-                                                    setState(() {
-                                                      _selectedEvent =
-                                                          eventModel.eventName;
-                                                      _scannedIdNums =
-                                                          HashSet();
-                                                    });
-                                                    Navigator.pop(context);
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                            separatorBuilder: (BuildContext
-                                                        context,
-                                                    int index) =>
-                                                const SizedBox(
-                                                  height: 0,
-                                                  //sets the border to 0
-                                                  child: DecoratedBox(
-                                                      decoration: BoxDecoration(
-                                                    color: Color.fromARGB(
-                                                        255, 0, 42, 77),
-                                                  )),
-                                                ));
-                                      }
-
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    },
                                   )*/
+
+
                                 ),
                               );
                             },
@@ -445,6 +435,7 @@ class _ScannerPageState extends State<ScannerPage> {
           FloatingActionButton(
             onPressed: () async {
               await fetchLatestData();
+              // await _offlineAttendanceService.clearAllCaches();
               controller.stop();
               showDialog(
                 context: context,
@@ -530,6 +521,138 @@ class _ScannerPageState extends State<ScannerPage> {
   }
 
   Future<void> fetchStudentAndEvent(
+      String studentId, String selectedEvent) async {
+    try {
+      // Check connectivity before proceeding
+      final hasReliableConnection =
+          await _connectivityService.checkConnectivity();
+      logger.i("Does have internet: $hasReliableConnection");
+
+      // Check if is available in cache
+      Student? cachedStudent =
+          await _offlineAttendanceService.getCachedStudent(studentId);
+      String? cachedEventId =
+          await _offlineAttendanceService.getCachedEventId(selectedEvent);
+
+      logger.i("Cached Event ID: $cachedEventId");
+
+      if (hasReliableConnection) {
+        try {
+          // Try online with timeout
+          await Future.wait([
+            _studentsDb
+                .where('is_deleted', isEqualTo: false)
+                .where('student_id', isEqualTo: studentId)
+                .get()
+                .timeout(const Duration(seconds: 3)),
+            _eventsDB
+                .where('is_deleted', isEqualTo: false)
+                .where('event_name', isEqualTo: selectedEvent)
+                .get()
+                .timeout(const Duration(seconds: 3)),
+          ]).then((results) async {
+            QuerySnapshot student = results[0];
+            QuerySnapshot event = results[1];
+
+            if (student.docs.isNotEmpty && event.docs.isNotEmpty) {
+              QueryDocumentSnapshot studentQueryDoc = student.docs.first;
+              QueryDocumentSnapshot eventQueryDoc = event.docs.first;
+
+              if (studentQueryDoc.data() != null &&
+                  studentQueryDoc.data() is Map<String, dynamic>) {
+                Student studentModel = Student.fromMap(
+                    studentQueryDoc.data() as Map<String, dynamic>);
+
+                // Cache data for offline use
+                // logger.i("Student Model: ${studentModel.firstName}");
+                // logger.i("Event Query Doc: ${eventQueryDoc.id}");
+
+                // await _offlineAttendanceService.cacheStudentData(studentModel);
+                await _offlineAttendanceService.cacheEventReference(eventQueryDoc.id, _selectedEvent);
+
+                // Mark attendance online
+                String firstName = studentModel.firstName;
+                DocumentReference studentDocRef = studentQueryDoc.reference;
+                DocumentReference eventDocRef = eventQueryDoc.reference;
+
+                await AttendanceService.makePresent(studentDocRef, eventDocRef);
+                // await _offlineAttendanceService.cacheStudentData(studentModel);
+                // await _offlineAttendanceService.cacheEventReference(
+                //   eventDocRef.id,
+                //   _selectedEvent,
+                // );
+                Fluttertoast.showToast(
+                  msg: firstName,
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.blue,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              } else {
+                logger.e("Student data is null or not a Map");
+                Fluttertoast.showToast(
+                  msg: "Error: Student data is invalid",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }
+            }
+          });
+        } catch (timeoutError) {
+          // If online times out, go back to offline
+          if (cachedStudent != null && cachedEventId != null) {
+            await _handleOfflineAttendance(studentId, selectedEvent, cachedStudent);
+          } else {
+            throw Exception('No cached data available');
+          }
+        }
+      } else if (cachedStudent != null && cachedEventId != null) {
+        // Offline Mode with cached data
+        await _handleOfflineAttendance(studentId, selectedEvent, cachedStudent);
+      } else {
+        throw Exception('No internet connection and no cached data available');
+      }
+    } catch (e, stackTrace) {
+      logger.e("Error processing attendance: $e");
+      logger.e(stackTrace.toString());
+      Fluttertoast.showToast(
+        msg: e.toString(),
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+  Future<void> _handleOfflineAttendance(
+      String studentId, String selectedEvent, Student student) async {
+    await _offlineAttendanceService.storePendingAttendance(
+      studentId: studentId,
+      eventName: selectedEvent,
+      selectedEvent: selectedEvent,
+    );
+
+    Fluttertoast.showToast(
+      msg: "${student.firstName} (Offline)",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.orange,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+
+  /*Future<void> fetchStudentAndEvent(
       String studentID, String selectedEvent) async {
     try {
       if (isConnectedToInternet) {
@@ -598,7 +721,7 @@ class _ScannerPageState extends State<ScannerPage> {
 
           // Cache data for offline use
           // await _offlineAttendanceService.cacheStudentData(studentModel);
-          /*await _offlineAttendanceService.cacheEventReference(
+          */ /*await _offlineAttendanceService.cacheEventReference(
             eventQueryDoc.id,
             selectedEvent,
           );
@@ -606,7 +729,7 @@ class _ScannerPageState extends State<ScannerPage> {
           // Mark attendance online
           String firstName = studentModel.firstName;
           DocumentReference studentDocRef = studentQueryDoc.reference;
-          DocumentReference eventDocRef = eventQueryDoc.reference;*/
+          DocumentReference eventDocRef = eventQueryDoc.reference;*/ /*
         } else {
           Fluttertoast.showToast(
               msg: "${studentID} is not found",
@@ -630,7 +753,7 @@ class _ScannerPageState extends State<ScannerPage> {
         fontSize: 16.0,
       );
     }
-  }
+  }*/
 
   Future<void> fetchLatestData() async {
     try {
